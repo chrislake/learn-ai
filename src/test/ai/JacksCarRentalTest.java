@@ -300,12 +300,12 @@ public class JacksCarRentalTest {
 	@Test
 	public void testPolicies() {
 		for (int state_t=0; state_t<sizeS; state_t++) {
-			Assert.assertArrayEquals(policy[state_t], markovDecisionProcess.getPolicy()[state_t], 0.001d);
+//			Assert.assertArrayEquals(policy[state_t], markovDecisionProcess.getPolicy()[state_t], 0.001d);
 			double sum = 0.0d;
 			for (int action_t=0; action_t<sizeA; action_t++) {
-				sum += policy[state_t][action_t];
+				sum += markovDecisionProcess.getPolicy()[state_t][action_t];
 			}
-			Assert.assertEquals(sum, 0.0d, 0.000001d);
+			Assert.assertEquals(sum, 1.0d, 0.000001d);
 		}
 	}
 

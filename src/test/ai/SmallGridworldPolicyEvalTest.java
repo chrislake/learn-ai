@@ -281,7 +281,7 @@ public class SmallGridworldPolicyEvalTest {
 
 	@Test
 	public void testDiscount00Matrix() {
-		markovDecisionProcess.setUseBellmanMatrix(true);
+		markovDecisionProcess.setUseBellmanMatrix(true, -1000);
 		markovDecisionProcess.setDiscountFactor(0.0d);
 		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(-1.0d, markovDecisionProcess.getStateValue(1), 0.1d);
@@ -303,7 +303,7 @@ public class SmallGridworldPolicyEvalTest {
 
 	@Test
 	public void testDiscount05Matrix() {
-		markovDecisionProcess.setUseBellmanMatrix(true);
+		markovDecisionProcess.setUseBellmanMatrix(true, -1000);
 		markovDecisionProcess.setDiscountFactor(0.5d);
 		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue(0), 0.01d);
 		Assert.assertEquals(-1.69d, markovDecisionProcess.getStateValue(1), 0.01d);
@@ -325,7 +325,7 @@ public class SmallGridworldPolicyEvalTest {
 
 	@Test
 	public void testDiscount09Matrix() {
-		markovDecisionProcess.setUseBellmanMatrix(true);
+		markovDecisionProcess.setUseBellmanMatrix(true, -1000);
 		markovDecisionProcess.setDiscountFactor(0.9d);
 		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue(0), 0.01d);
 		Assert.assertEquals(-5.28d, markovDecisionProcess.getStateValue(1), 0.01d);
@@ -347,7 +347,7 @@ public class SmallGridworldPolicyEvalTest {
 
 	@Test
 	public void testDiscount10Matrix() {
-		markovDecisionProcess.setUseBellmanMatrix(true);
+		markovDecisionProcess.setUseBellmanMatrix(true, -1000);
 		markovDecisionProcess.setDiscountFactor(1.0d);
 		Assert.assertEquals(  0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(-14.0d, markovDecisionProcess.getStateValue(1), 0.1d);
@@ -934,7 +934,7 @@ public class SmallGridworldPolicyEvalTest {
 
 	@Test
 	public void testDiscount10CountK0() {
-		markovDecisionProcess.setUseCounterPolicy(0);
+		markovDecisionProcess.setUseCounterPolicy(0, -1000);
 		markovDecisionProcess.setDiscountFactor(1.0d);
 		Assert.assertEquals(0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(0.0d, markovDecisionProcess.getStateValue(1), 0.1d);
@@ -1021,7 +1021,7 @@ public class SmallGridworldPolicyEvalTest {
 
 	@Test
 	public void testDiscount10CountK1() {
-		markovDecisionProcess.setUseCounterPolicy(1);
+		markovDecisionProcess.setUseCounterPolicy(1, -1000);
 		markovDecisionProcess.setDiscountFactor(1.0d);
 		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(-1.0d, markovDecisionProcess.getStateValue(1), 0.1d);
@@ -1108,7 +1108,7 @@ public class SmallGridworldPolicyEvalTest {
 
 	@Test
 	public void testDiscount10CountK2() {
-		markovDecisionProcess.setUseCounterPolicy(2);
+		markovDecisionProcess.setUseCounterPolicy(2, -1000);
 		markovDecisionProcess.setDiscountFactor(1.0d);
 		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(-1.7d, markovDecisionProcess.getStateValue(1), 0.1d);
@@ -1195,7 +1195,7 @@ public class SmallGridworldPolicyEvalTest {
 
 	@Test
 	public void testDiscount10CountK3() {
-		markovDecisionProcess.setUseCounterPolicy(3);
+		markovDecisionProcess.setUseCounterPolicy(3, -1000);
 		markovDecisionProcess.setDiscountFactor(1.0d);
 		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(-2.4d, markovDecisionProcess.getStateValue(1), 0.1d);
@@ -1282,7 +1282,7 @@ public class SmallGridworldPolicyEvalTest {
 
 	@Test
 	public void testDiscount10CountK10() {
-		markovDecisionProcess.setUseCounterPolicy(10);
+		markovDecisionProcess.setUseCounterPolicy(10, -1000);
 		markovDecisionProcess.setDiscountFactor(1.0d);
 		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(-6.1d, markovDecisionProcess.getStateValue(1), 0.1d);
@@ -1369,7 +1369,7 @@ public class SmallGridworldPolicyEvalTest {
 
 	@Test
 	public void testDiscount10Greedy() {
-		markovDecisionProcess.setUseBellmanMatrix(true);
+		markovDecisionProcess.setUseBellmanMatrix(true, -1000);
 		markovDecisionProcess.setDiscountFactor(1.0d);
 		markovDecisionProcess.evaluatePolicy_Greedy();
 

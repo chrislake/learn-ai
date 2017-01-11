@@ -27,6 +27,8 @@ public class MDPPolicyOptimalEval<S, A> {
 	private double valueInitMax = 0.0d;
 	private int valueFunctionAttempts = 0;
 
+	private boolean optimalPolicy = false;
+
 	public MDPPolicyOptimalEval(int sizeS, int sizeA) {
 		this(sizeS, sizeA, 0.0d);
 	}
@@ -122,6 +124,7 @@ public class MDPPolicyOptimalEval<S, A> {
 	}
 	public void setDiscountFactor(double discount) {
 		discountFactor = discount;
+		optimalPolicy = false;
 		executeStateValueFunction();
 	}
 
@@ -159,8 +162,9 @@ public class MDPPolicyOptimalEval<S, A> {
 		stateActionRewards[state_t][action_t] = reward;
 	}
 
-	public void setUseBellmanMatrix(boolean useMatrix) {
+	public void setUseBellmanMatrix(boolean useMatrix, double optimalStartMax) {
 		this.useMatrix = useMatrix;
+		this.valueInitMax = optimalStartMax;
 	}
 	public void setUseOptimalPolicy(boolean useOptimal, double optimalStartMax) {
 		this.useMatrix = false;
@@ -168,11 +172,12 @@ public class MDPPolicyOptimalEval<S, A> {
 		this.useCount = false;
 		this.valueInitMax = optimalStartMax;
 	}
-	public void setUseCounterPolicy(int attempts) {
+	public void setUseCounterPolicy(int attempts, double optimalStartMax) {
 		useMatrix = false;
 		useOptimal = false;
 		useCount = true;
 		valueFunctionAttempts = attempts;
+		valueInitMax = optimalStartMax;
 	}
 
 	public double getExpectedReturn(S[] plannedStates, int state_t) {
@@ -212,10 +217,11 @@ public class MDPPolicyOptimalEval<S, A> {
 
 	public void evaluatePolicy_Greedy() {
 		// pi'(s) = argmax qpi(s, a) {a in A}
+		if (optimalPolicy) return;
+		optimalPolicy = true;
 		for (int state_t=0; state_t<states.length; state_t++) {
-			for(int action_t=0; action_t<actions.length; action_t++) {
-				policy[state_t][action_t] = 0.0;
-			}
+			double[] policyOld = policy[state_t];
+			policy[state_t] = new double[actions.length];
 
 			double maxValue = valueInitMax;
 			int maxCount = 0;
@@ -238,6 +244,9 @@ public class MDPPolicyOptimalEval<S, A> {
 						policy[state_t][action_t] = 1.0/maxCount;
 					}
 				}
+			}
+			for (int action_t=0; action_t<actions.length; action_t++) {
+				optimalPolicy &= policyOld[action_t] == policy[state_t][action_t];
 			}
 		}
 		
@@ -384,7 +393,7 @@ public class MDPPolicyOptimalEval<S, A> {
 	}
 
 	private double actionFunctionBellmanOptimal (int state_t, int action_t) {
-		// qpi(s, a) = Ras + y * sum(Pass'v(s')  {s' in S}
+		// q*(s, a) = Ras + y * sum(Pass'v*(s')  {s' in S}
 		double stateValue = 0.0d;
 		for (int statePrime_t=0; statePrime_t<states.length; statePrime_t++) {
 			stateValue += getProbablilityStateStatePrime(state_t, action_t, statePrime_t) * stateValues[statePrime_t];

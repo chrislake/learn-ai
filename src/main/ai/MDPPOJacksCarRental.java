@@ -46,7 +46,6 @@ public class MDPPOJacksCarRental<S, A> {
 
 	private boolean optimalPolicy = false;
 
-	
 	public MDPPOJacksCarRental(int sizeS, int sizeA) {
 		this(sizeS, sizeA, 0.0d);
 	}
@@ -142,6 +141,7 @@ public class MDPPOJacksCarRental<S, A> {
 	}
 	public void setDiscountFactor(double discount) {
 		discountFactor = discount;
+		optimalPolicy = false;
 		executeStateValueFunction();
 	}
 
