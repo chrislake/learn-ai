@@ -44,6 +44,9 @@ public class MDPPOJacksCarRental<S, A> {
 	private double valueInitMax = 0.0d;
 	private int valueFunctionAttempts = 0;
 
+	private boolean optimalPolicy = false;
+
+	
 	public MDPPOJacksCarRental(int sizeS, int sizeA) {
 		this(sizeS, sizeA, 0.0d);
 	}
@@ -65,57 +68,57 @@ public class MDPPOJacksCarRental<S, A> {
 
 	@SuppressWarnings("unchecked")
 	public S[] getStates() {
-		return (S[]) this.states;
+		return (S[]) states;
 	}
 	@SuppressWarnings("unchecked")
 	public S getState(int t) {
-		return (S) this.states[t];
+		return (S) states[t];
 	}
 	public int getState_t(S state) {
-		for (int t=0; t<this.states.length; t++) {
+		for (int t=0; t<states.length; t++) {
 			if (getState(t).equals(state)) return t;
 		}
 		return -1;
 	}
 	public void setState(int t, S state) {
-		this.states[t] = state;
+		states[t] = state;
 	}
 
 	@SuppressWarnings("unchecked")
 	public A[] getActions() {
-		return (A[]) this.actions;
+		return (A[]) actions;
 	}
 	@SuppressWarnings("unchecked")
 	public A getAction(int t) {
-		return (A) this.actions[t];
+		return (A) actions[t];
 	}
 	public int getAction_t(A action) {
-		for (int t=0; t<this.actions.length; t++) {
+		for (int t=0; t<actions.length; t++) {
 			if (getAction(t).equals(action)) return t;
 		}
 		return -1;
 	}
 	public void setAction(int t, A action) {
-		this.actions[t] = action;
+		actions[t] = action;
 	}
 
 	public double[][][] getStateTransitionProbabilityMatrix () {
-		return this.stateTransitionProbabilityMatrix;
+		return stateTransitionProbabilityMatrix;
 	}
 	public double getProbablilityStateStatePrime (S state, A action, S statePrime) {
 		// Pass' = P [St+1 = s' | St = s, At = a]
 		int state_t = getState_t(state);
 		int action_t = getAction_t(action);
 		int statePrime_t = getState_t(statePrime);
-		return this.stateTransitionProbabilityMatrix[state_t][action_t][statePrime_t];
+		return stateTransitionProbabilityMatrix[state_t][action_t][statePrime_t];
 	}
 	public double getProbablilityStateStatePrime (int state_t, int action_t, int statePrime_t) {
 		// Pss' = P [St+1 = s' | St = s, At = a]
-		return this.stateTransitionProbabilityMatrix[state_t][action_t][statePrime_t];
+		return stateTransitionProbabilityMatrix[state_t][action_t][statePrime_t];
 	}
 	public double getProbablilityPolicyStateStatePrime (S state, S statePrime) {
 		double return_Ppissp = 0.0d;
-		for (int action_t=0; action_t<this.actions.length; action_t++) {
+		for (int action_t=0; action_t<actions.length; action_t++) {
 			A action = getAction(action_t);
 			double policy = getStatePolicy(state, action);
 			return_Ppissp += policy * getProbablilityStateStatePrime(state, action, statePrime);
@@ -124,40 +127,40 @@ public class MDPPOJacksCarRental<S, A> {
 	}
 	public double getProbablilityPolicyStateStatePrime (int state_t, int statePrime_t) {
 		double return_Ppissp = 0.0d;
-		for (int action_t=0; action_t<this.actions.length; action_t++) {
+		for (int action_t=0; action_t<actions.length; action_t++) {
 			double policy = getStatePolicy(state_t, statePrime_t);
 			return_Ppissp += policy * getProbablilityStateStatePrime(state_t, action_t, statePrime_t);
 		}
 		return return_Ppissp;
 	}
 	public void setProbablilityStateStatePrime(int state, int action_t, int statePrime, double probablility) {
-		this.stateTransitionProbabilityMatrix[state][action_t][statePrime] = probablility;
+		stateTransitionProbabilityMatrix[state][action_t][statePrime] = probablility;
 	}
 
 	public double getDiscountFactor() {
-		return this.discountFactor;
+		return discountFactor;
 	}
 	public void setDiscountFactor(double discount) {
-		this.discountFactor = discount;
+		discountFactor = discount;
 		executeStateValueFunction();
 	}
 
 	public double[][] getRewards() {
-		return this.stateActionRewards;
+		return stateActionRewards;
 	}
 	public double getReward(S state, A action) {
 		// R is a reward function
 		int state_t = getState_t(state);
 		int action_t = getAction_t(action);
-		return this.stateActionRewards[state_t][action_t];
+		return stateActionRewards[state_t][action_t];
 	}
 	public double getReward(int state_t, int action_t) {
 		// R is a reward function
-		return this.stateActionRewards[state_t][action_t];
+		return stateActionRewards[state_t][action_t];
 	}
 	public double getRewardPolicy(S state) {
 		double return_Rpis = 0.0d;
-		for (int action_t=0; action_t<this.actions.length; action_t++) {
+		for (int action_t=0; action_t<actions.length; action_t++) {
 			A action = getAction(action_t);
 			double policy = getStatePolicy(state, action);
 			return_Rpis += policy * getReward(state, action);
@@ -166,14 +169,14 @@ public class MDPPOJacksCarRental<S, A> {
 	}
 	public double getRewardPolicy(int state_t) {
 		double return_Rpis = 0.0d;
-		for (int action_t=0; action_t<this.actions.length; action_t++) {
+		for (int action_t=0; action_t<actions.length; action_t++) {
 			double policy = getStatePolicy(state_t, action_t);
 			return_Rpis += policy * getReward(state_t, action_t);
 		}
 		return return_Rpis;
 	}
 	public void setReward(int state_t, int action_t, double reward) {
-		this.stateActionRewards[state_t][action_t] = reward;
+		stateActionRewards[state_t][action_t] = reward;
 	}
 
 	public void setUseBellmanMatrix(boolean useMatrix) {
@@ -186,10 +189,10 @@ public class MDPPOJacksCarRental<S, A> {
 		this.valueInitMax = optimalStartMax;
 	}
 	public void setUseCounterPolicy(int attempts) {
-		this.useMatrix = false;
-		this.useOptimal = false;
-		this.useCount = true;
-		this.valueFunctionAttempts = attempts;
+		useMatrix = false;
+		useOptimal = false;
+		useCount = true;
+		valueFunctionAttempts = attempts;
 	}
 
 	public double getExpectedReturn(S[] plannedStates, int state_t) {
@@ -204,57 +207,61 @@ public class MDPPOJacksCarRental<S, A> {
 		for (int k=0; k<plannedStates.length; k++) {
 			S state = plannedStates[k];
 			double reward_t = getRewardPolicy(state);
-			return_Gt += Math.pow(this.discountFactor, k) * reward_t;
+			return_Gt += Math.pow(discountFactor, k) * reward_t;
 		}
 
 		return return_Gt;
 	}
 
 	public double[][] getPolicy() {
-		return this.policy;
+		return policy;
 	}
 	public double getStatePolicy(S state, A action) {
 		//π(a|s) = P [At = a | St = s]
 		int state_t = getState_t(state);
 		int action_t = getAction_t(action);
-		return this.policy[state_t][action_t];
+		return policy[state_t][action_t];
 	}
 	public double getStatePolicy(int state_t, int action_t) {
 		//π(a|s) = P [At = a | St = s]
-		return this.policy[state_t][action_t];
+		return policy[state_t][action_t];
 	}
 	public void setPolicy(int state_t, int action_t, double probability) {
-		this.policy[state_t][action_t] = probability;
+		policy[state_t][action_t] = probability;
 	}
 
 	public void evaluatePolicy_Greedy() {
 		// pi'(s) = argmax qpi(s, a) {a in A}
-		for (int state_t=0; state_t<this.states.length; state_t++) {
-			for(int action_t=0; action_t<this.actions.length; action_t++) {
-				this.policy[state_t][action_t] = 0.0;
-			}
+		if (optimalPolicy) return;
+		optimalPolicy = true;
+		for (int state_t=0; state_t<states.length; state_t++) {
+			double[] policyOld = policy[state_t];
+			policy[state_t] = new double[actions.length];
 
-			double maxValue = this.valueInitMax;
+			double maxValue = valueInitMax;
 			int maxCount = 0;
-			for (int action_t=0; action_t<this.actions.length; action_t++) {
+			for (int action_t=0; action_t<actions.length; action_t++) {
 				double actionValue = getActionValue(state_t, action_t);
 				if (actionValue > maxValue) {
 					maxValue = actionValue;
 					maxCount = 1;
-					for(int action_tp=0; action_tp<this.actions.length; action_tp++) {
-						this.policy[state_t][action_tp] = 0.0;
+					for(int action_tp=0; action_tp<actions.length; action_tp++) {
+						policy[state_t][action_tp] = 0.0;
 					}
-					this.policy[state_t][action_t] = 1.0;
+					policy[state_t][action_t] = 1.0;
 				}
 				else {
 					if (!Util.doubleIsDifferent(actionValue, maxValue, valueFunctionPrecision)) {
 						maxCount++;
-						for(int action_tp=0; action_tp<this.actions.length; action_tp++) {
-							if (this.policy[state_t][action_tp] > 0.0) this.policy[state_t][action_tp] = 1.0d/maxCount;
+						for(int action_tp=0; action_tp<actions.length; action_tp++) {
+							if (policy[state_t][action_tp] > 0.0) policy[state_t][action_tp] = 1.0d/maxCount;
 						}
-						this.policy[state_t][action_t] = 1.0/maxCount;
+						policy[state_t][action_t] = 1.0/maxCount;
 					}
 				}
+			}
+			for (int action_t=0; action_t<actions.length; action_t++) {
+				optimalPolicy &= policyOld[action_t] == policy[state_t][action_t];
 			}
 		}
 		
@@ -278,21 +285,21 @@ public class MDPPOJacksCarRental<S, A> {
 //
 //	public S findSp(S s, A a) {
 //		int st = 0;
-//		for (; st<this.S.length; st++) {
+//		for (; st<S.length; st++) {
 //			S St = getS(st);
 //			if (St.equals(s)) break;
 //		}
 //
 //		int at = 0;
-//		for (; at<this.A.length; at++) {
+//		for (; at<A.length; at++) {
 //			A At = getA(at);
 //			if (At.equals(a)) break;
 //		}
 //
 //		double r = Math.random() + 0.000001d;
 //		double sum = 0.0d;
-//		for (int sp=0; sp<this.S.length; sp++) {
-//			double pr = this.P[st][at][sp];
+//		for (int sp=0; sp<S.length; sp++) {
+//			double pr = P[st][at][sp];
 //			if (pr == 0.0d) continue;
 //
 //			if (pr == 1.0d) {
@@ -331,10 +338,10 @@ public class MDPPOJacksCarRental<S, A> {
 		}
 	}
 	public double getStateValue(S state) {
-		return this.stateValues[getState_t(state)];
+		return stateValues[getState_t(state)];
 	}
 	public double getStateValue(int state_t) {
-		return this.stateValues[state_t];
+		return stateValues[state_t];
 	}
 	public double getActionValue(S state, A action) {
 		int state_t = getState_t(state);
@@ -347,7 +354,7 @@ public class MDPPOJacksCarRental<S, A> {
 
 	private void valueFunctionBellmanEquation () {
 		// vpi(s) = sum(pi(a|s)qpi(s,a))
-		this.stateValues = new double[this.stateValues.length];
+		stateValues = new double[stateValues.length];
 
 		boolean goAgain = true;
 		valueFunctionAttempts = 0;
@@ -355,15 +362,15 @@ public class MDPPOJacksCarRental<S, A> {
 			goAgain = false;
 			valueFunctionAttempts++;
 
-			for (int state_t=0; state_t<this.states.length; state_t++) {
+			for (int state_t=0; state_t<states.length; state_t++) {
 				double stateValue = 0.0d;
-				double currStateValue = this.stateValues[state_t];
-				for (int action_t=0; action_t<this.actions.length; action_t++) {
+				double currStateValue = stateValues[state_t];
+				for (int action_t=0; action_t<actions.length; action_t++) {
 					double policy = getStatePolicy(state_t, action_t);
 					stateValue += policy * actionFunctionBellmanEquation(state_t, action_t);
 				}
-				this.stateValues[state_t] = stateValue;
-				goAgain |= Util.doubleIsDifferent(currStateValue, this.stateValues[state_t], valueFunctionPrecision);
+				stateValues[state_t] = stateValue;
+				goAgain |= Util.doubleIsDifferent(currStateValue, stateValues[state_t], valueFunctionPrecision);
 			}
 		}
 	}
@@ -371,15 +378,15 @@ public class MDPPOJacksCarRental<S, A> {
 	private double actionFunctionBellmanEquation (int state_t, int action_t) {
 		// qpi(s, a) = Ras + y * sum(Pass'v(s')  {s' in S}
 		double stateValue = 0.0d;
-		for (int statePrime_t=0; statePrime_t<this.states.length; statePrime_t++) {
-			stateValue += getProbablilityStateStatePrime(state_t, action_t, statePrime_t) * this.stateValues[statePrime_t];
+		for (int statePrime_t=0; statePrime_t<states.length; statePrime_t++) {
+			stateValue += getProbablilityStateStatePrime(state_t, action_t, statePrime_t) * stateValues[statePrime_t];
 		}
-		return getReward(state_t, action_t) + (this.discountFactor * stateValue);
+		return getReward(state_t, action_t) + (discountFactor * stateValue);
 	}
 
 	private void valueFunctionBellmanOptimal () {
 		// v*(s) = max(q*(s, a)) {a in A}
-		this.stateValues = new double[this.stateValues.length];
+		stateValues = new double[stateValues.length];
 
 		boolean goAgain = true;
 		valueFunctionAttempts = 0;
@@ -387,15 +394,15 @@ public class MDPPOJacksCarRental<S, A> {
 			goAgain = false;
 			valueFunctionAttempts++;
 
-			for (int state_t=0; state_t<this.states.length; state_t++) {
+			for (int state_t=0; state_t<states.length; state_t++) {
 				double max = valueInitMax;
-				double currStateValue = this.stateValues[state_t];
-				for (int action_t=0; action_t<this.actions.length; action_t++) {
+				double currStateValue = stateValues[state_t];
+				for (int action_t=0; action_t<actions.length; action_t++) {
 					double optimal = actionFunctionBellmanOptimal(state_t, action_t);
 					max = optimal > max ? optimal : max;
 				}
-				this.stateValues[state_t] = max;
-				goAgain |= Util.doubleIsDifferent(currStateValue, this.stateValues[state_t], valueFunctionPrecision);
+				stateValues[state_t] = max;
+				goAgain |= Util.doubleIsDifferent(currStateValue, stateValues[state_t], valueFunctionPrecision);
 			}
 		}
 	}
@@ -403,46 +410,46 @@ public class MDPPOJacksCarRental<S, A> {
 	private double actionFunctionBellmanOptimal (int state_t, int action_t) {
 		// qpi(s, a) = Ras + y * sum(Pass'v(s')  {s' in S}
 		double stateValue = 0.0d;
-		for (int statePrime_t=0; statePrime_t<this.states.length; statePrime_t++) {
-			stateValue += getProbablilityStateStatePrime(state_t, action_t, statePrime_t) * this.stateValues[statePrime_t];
+		for (int statePrime_t=0; statePrime_t<states.length; statePrime_t++) {
+			stateValue += getProbablilityStateStatePrime(state_t, action_t, statePrime_t) * stateValues[statePrime_t];
 		}
-		return getReward(state_t, action_t) + (this.discountFactor * stateValue);
+		return getReward(state_t, action_t) + (discountFactor * stateValue);
 	}
 
 	private void valueFunctionBellmanEquationK () {
 		// vk+1(s) = sum(pi(a|s)Ras + y * sum(Pass'vk(s')  {s' in S}))
-		this.stateValues = new double[this.stateValues.length];
+		stateValues = new double[stateValues.length];
 
-		for (int k=0; k<this.valueFunctionAttempts; k++) {
-			double stateValues_bk[] = Arrays.copyOf(this.stateValues, this.stateValues.length);
-			for (int state_t=0; state_t<this.states.length; state_t++) {
+		for (int k=0; k<valueFunctionAttempts; k++) {
+			double stateValues_bk[] = Arrays.copyOf(stateValues, stateValues.length);
+			for (int state_t=0; state_t<states.length; state_t++) {
 				double stateValue = 0.0d;
-				for (int action_t=0; action_t<this.actions.length; action_t++) {
+				for (int action_t=0; action_t<actions.length; action_t++) {
 					double policy = getStatePolicy(state_t, action_t);
 					double reward = getReward(state_t, action_t);
 					double actionValue = 0.0d;
-					for (int statePrime_t=0; statePrime_t<this.states.length; statePrime_t++) {
+					for (int statePrime_t=0; statePrime_t<states.length; statePrime_t++) {
 						double return_Pass = getProbablilityStateStatePrime(state_t, action_t, statePrime_t);
 						actionValue += return_Pass * stateValues_bk[statePrime_t];
 					}
-					stateValue += policy * (reward + this.discountFactor * actionValue);
+					stateValue += policy * (reward + discountFactor * actionValue);
 				}
-				this.stateValues[state_t] = stateValue;
+				stateValues[state_t] = stateValue;
 			}
 		}
 	}
 
 	private void valueFunctionBellmanMatrix() {
 		// vpi = (I − yPpi)^−1 Rpi
-		int len = this.states.length;
-		this.stateValues = new double[this.stateValues.length];
+		int len = states.length;
+		stateValues = new double[stateValues.length];
 
 		double[][] Imatrix = Util.getIdentityMatrix(len);
 		double[][] matrix = new double[len][len];
 		for (int row=0; row<len; row++) {
 			for (int col=0; col<len; col++) {
-				for (int action_t=0; action_t<this.actions.length; action_t++) {
-					matrix[row][col] += this.discountFactor * this.stateTransitionProbabilityMatrix[row][action_t][col] * getStatePolicy(row, action_t);
+				for (int action_t=0; action_t<actions.length; action_t++) {
+					matrix[row][col] += discountFactor * stateTransitionProbabilityMatrix[row][action_t][col] * getStatePolicy(row, action_t);
 				}
 				matrix[row][col] = Imatrix[row][col] - matrix[row][col];
 			}
@@ -471,10 +478,10 @@ public class MDPPOJacksCarRental<S, A> {
 			}
 		}
 
-		for (int action_t=0; action_t<this.actions.length; action_t++) {
+		for (int action_t=0; action_t<actions.length; action_t++) {
 			for (int row=0; row<len; row++) {
 				for (int col=0; col<len; col++) {
-					this.stateValues[row] += Imatrix[row][col] * getReward(col, action_t) * getStatePolicy(col, action_t);
+					stateValues[row] += Imatrix[row][col] * getReward(col, action_t) * getStatePolicy(col, action_t);
 				}
 			}
 		}

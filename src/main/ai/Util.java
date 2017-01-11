@@ -14,13 +14,8 @@ public class Util {
 
     public static double[][] getIdentityMatrix(int size) {
 		double[][] I = new double[size][size];
-		for (int row=0; row<size; row++) {
-			for (int col=0; col<size; col++) {
-				if (row == col) {
-					I[row][col] = 1.0d;
-					break;
-				}
-			}
+		for (int rc=0; rc<size; rc++) {
+			I[rc][rc] = 1.0d;
 		}
 		return I;
     }

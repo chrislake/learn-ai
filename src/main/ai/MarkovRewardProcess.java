@@ -39,60 +39,60 @@ public class MarkovRewardProcess<S> {
 
 	@SuppressWarnings("unchecked")
 	public S[] getStates() {
-		return (S[]) this.states;
+		return (S[]) states;
 	}
 	@SuppressWarnings("unchecked")
 	public S getState(int t) {
-		return (S) this.states[t];
+		return (S) states[t];
 	}
 	public int getState_t(S state) {
-		for (int t=0; t<this.states.length; t++) {
+		for (int t=0; t<states.length; t++) {
 			if (getState(t).equals(state)) return t;
 		}
 		return -1;
 	}
 	public void setState(int t, S state) {
-		this.states[t] = state;
+		states[t] = state;
 	}
 
 	public double[][] getStateTransitionProbabilityMatrix () {
-		return this.stateTransitionProbabilityMatrix;
+		return stateTransitionProbabilityMatrix;
 	}
 	public double getProbablilityStateStatePrime (S state, S statePrime) {
 		// Pss' = P [St+1 = s' | St = s]
 		int state_t = getState_t(state);
 		int statePrime_t = getState_t(statePrime);
-		return this.stateTransitionProbabilityMatrix[state_t][statePrime_t];
+		return stateTransitionProbabilityMatrix[state_t][statePrime_t];
 	}
 	public double getProbablilityStateStatePrime (int state_t, int statePrime_t) {
 		// Pss' = P [St+1 = s' | St = s]
-		return this.stateTransitionProbabilityMatrix[state_t][statePrime_t];
+		return stateTransitionProbabilityMatrix[state_t][statePrime_t];
 	}
 	public void setProbablilityStateStatePrime(int state, int statePrime, double probablility) {
-		this.stateTransitionProbabilityMatrix[state][statePrime] = probablility;
+		stateTransitionProbabilityMatrix[state][statePrime] = probablility;
 	}
 
 	public double getDiscountFactor() {
-		return this.discountFactor;
+		return discountFactor;
 	}
 	public void setDiscountFactor(double discount) {
-		this.discountFactor = discount;
+		discountFactor = discount;
 		executeStateValueFunction();
 	}
 
 	public double[] getRewards() {
-		return this.stateRewards;
+		return stateRewards;
 	}
 	public double getReward(S state) {
 		// R is a reward function
-		return this.stateRewards[getState_t(state)];
+		return stateRewards[getState_t(state)];
 	}
 	public double getReward(int state_t) {
 		// R is a reward function
-		return this.stateRewards[state_t];
+		return stateRewards[state_t];
 	}
 	public void setReward(int t, double reward) {
-		this.stateRewards[t] = reward;
+		stateRewards[t] = reward;
 	}
 
 	public void setUseBellmanMatrix(boolean useMatrix) {
@@ -110,7 +110,7 @@ public class MarkovRewardProcess<S> {
 		double return_Gt = 0.0;
 		for (int k=0; k<plannedEpisode.length; k++) {
 			double reward_t = getReward(plannedEpisode[k]);
-			return_Gt += Math.pow(this.discountFactor, k) * reward_t;
+			return_Gt += Math.pow(discountFactor, k) * reward_t;
 		}
 
 		return return_Gt;
@@ -121,15 +121,15 @@ public class MarkovRewardProcess<S> {
 		else valueFunctionBellmanEquation();
 	}
 	public double getStateValue(S state) {
-		return this.stateValues[getState_t(state)];
+		return stateValues[getState_t(state)];
 	}
 	public double getStateValue(int state_t) {
-		return this.stateValues[state_t];
+		return stateValues[state_t];
 	}
 
 	private void valueFunctionBellmanEquation () {
 		// v(s) = Rs + y * sum(Pss'v(s') { s' in S)
-		this.stateValues = new double[this.stateValues.length];
+		stateValues = new double[stateValues.length];
 
 		boolean goAgain = true;
 		valueFunctionAttempts = 0;
@@ -137,29 +137,29 @@ public class MarkovRewardProcess<S> {
 			goAgain = false;
 			valueFunctionAttempts++;
 
-			for (int state_t=0; state_t<this.states.length; state_t++) {
+			for (int state_t=0; state_t<states.length; state_t++) {
 				double stateValue = 0.0d;
-				double currStateValue = this.stateValues[state_t];
-				for (int statePrime_t=0; statePrime_t<this.states.length; statePrime_t++) {
-					stateValue += getProbablilityStateStatePrime(state_t, statePrime_t) * this.stateValues[statePrime_t];
+				double currStateValue = stateValues[state_t];
+				for (int statePrime_t=0; statePrime_t<states.length; statePrime_t++) {
+					stateValue += getProbablilityStateStatePrime(state_t, statePrime_t) * stateValues[statePrime_t];
 				}
 
-				this.stateValues[state_t] = getReward(state_t) + (this.discountFactor * stateValue);
-				goAgain |= Util.doubleIsDifferent(currStateValue, this.stateValues[state_t], valueFunctionPrecision);
+				stateValues[state_t] = getReward(state_t) + (discountFactor * stateValue);
+				goAgain |= Util.doubleIsDifferent(currStateValue, stateValues[state_t], valueFunctionPrecision);
 			}
 		}
 	}
 
     private void valueFunctionBellmanMatrix() {
     	// v = (I − yP)^−1 R
-		int len = this.states.length;
-		this.stateValues = new double[this.stateValues.length];
+		int len = states.length;
+		stateValues = new double[stateValues.length];
 
 		double[][] Imatrix = Util.getIdentityMatrix(len);
 		double[][] matrix = new double[len][len];
 		for (int row=0; row<len; row++) {
 			for (int col=0; col<len; col++) {
-				matrix[row][col] = Imatrix[row][col] - this.discountFactor * this.stateTransitionProbabilityMatrix[row][col];
+				matrix[row][col] = Imatrix[row][col] - discountFactor * stateTransitionProbabilityMatrix[row][col];
 			}
 		}
 
@@ -188,7 +188,7 @@ public class MarkovRewardProcess<S> {
 
 		for (int row=0; row<len; row++) {
 			for (int col=0; col<len; col++) {
-				this.stateValues[row] += Imatrix[row][col] * getReward(col);
+				stateValues[row] += Imatrix[row][col] * getReward(col);
 			}
 		}
 	}

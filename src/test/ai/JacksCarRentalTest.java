@@ -336,6 +336,21 @@ public class JacksCarRentalTest {
 		markovDecisionProcess.evaluatePolicy_Greedy();
 		printStateValues();
 		printPolicy();
+		System.out.println();
+		System.out.println();
+		markovDecisionProcess.evaluatePolicy_Greedy();
+		printStateValues();
+		printPolicy();
+		System.out.println();
+		System.out.println();
+		markovDecisionProcess.evaluatePolicy_Greedy();
+		printStateValues();
+		printPolicy();
+		System.out.println();
+		System.out.println();
+		markovDecisionProcess.evaluatePolicy_Greedy();
+		printStateValues();
+		printPolicy();
 	}
 
 	public void printStateValues() {
