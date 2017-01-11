@@ -68,7 +68,7 @@ public class JacksCarRentalTest {
 					markovDecisionProcess.setReward(stateIndex, action_t, siteAReward + siteBReward - 2*Math.abs(action));
 					for (int siteAQtyNew=0; siteAQtyNew<=20; siteAQtyNew++) {
 						for (int siteBQtyNew=0; siteBQtyNew<=20; siteBQtyNew++) {
-							int stateIndexNew = siteAQtyNew + siteBQtyNew * 21;
+							int stateIndexNew = siteBQtyNew + siteAQtyNew * 21;
 							markovDecisionProcess.setProbablilityStateStatePrime(stateIndex, action_t, stateIndexNew, siteACarsLeft[siteAQtyNew] * siteBCarsLeft[siteBQtyNew]);
 						}
 					}
@@ -165,44 +165,56 @@ public class JacksCarRentalTest {
 //		}
 //		System.out.println(sum);
 
-		for (int siteA=0;siteA<21;siteA++){
-			for (int siteB=0;siteB<21;siteB++){
-				int stateIndex = siteB + siteA * 21;
-				double sum = 0.0;
-				for (int action_t=0;action_t<sizeA;action_t++){
-					Integer action = markovDecisionProcess.getAction(action_t);
-					if (siteA-action >= 0 && siteA-action <= 20 && siteB+action >= 0 && siteB+action <= 20) {
-						int _a = siteA-action;
-						int _b = siteB+action;
-						double probsReqRetA[][] = new double[21][21];
-						double probsReqRetB[][] = new double[21][21];
-						for (int requests=0;requests<21;requests++) {
-							int rent_a = Math.min(requests, _a);
-							int rent_b = Math.min(requests, _b);
-							for (int returns=0;returns<21;returns++) {
-								int __a = Math.min(_a - rent_a + returns, 20);
-								int __b = Math.min(_b - rent_b + returns, 20);
-								probsReqRetA[requests][returns] = poisson[requests][0] * poisson[returns][0];
-								probsReqRetB[requests][returns] = poisson[requests][0] * poisson[returns][0];
+		double probsReqRetA[][] = new double[21][21];
+		double probsReqRetB[][] = new double[21][21];
+		for (int requestsB=0;requestsB<21;requestsB++) {
+			for (int returnsB=0;returnsB<21;returnsB++) {
+				probsReqRetB[requestsB][returnsB] = poisson[requestsB][2] * poisson[returnsB][3];
+			}
+		}
 
-								int statePrimeIndex = __b + __a * 21;
-								stateTPM[stateIndex][action_t][statePrimeIndex] += probsReqRetA[requests][returns] * probsReqRetB[requests][returns];
-							}
-						}
-//						if (siteA==0 && siteB==5) {
-//							for (int returns=0;returns<21;returns++) {
-//								for (int requests=0;requests<21;requests++) {
-//									System.out.print(String.format("%.5f\t", probsReqRetA[requests][returns] * probsReqRetB[requests][returns]));
-//									sum += probsReqRetA[requests][returns] * probsReqRetB[requests][returns];
-//								}
-//								System.out.println();
-//							}
-//							System.out.println(sum);
-//						}
+		double probsReqRetAB[][][][] = new double[21][21][21][21];
+		for (int requestsA=0;requestsA<21;requestsA++) {
+			for (int returnsA=0;returnsA<21;returnsA++) {
+				probsReqRetA[requestsA][returnsA] = poisson[requestsA][0] * poisson[returnsA][1];
+
+				for (int requestsB=0;requestsB<21;requestsB++) {
+					for (int returnsB=0;returnsB<21;returnsB++) {
+						probsReqRetAB[requestsA][returnsA][requestsB][returnsB] = probsReqRetA[requestsA][returnsA] * probsReqRetB[requestsB][returnsB];
 					}
 				}
 			}
 		}
+
+		for (int siteA=0;siteA<21;siteA++){
+			for (int siteB=0;siteB<21;siteB++){
+				int stateIndex = siteB + siteA * 21;
+				for (int action_t=0;action_t<sizeA;action_t++){
+					Integer action = markovDecisionProcess.getAction(action_t);
+					if (siteA-action >= 0 && siteA-action <= 20 && siteB+action >= 0 && siteB+action <= 20) {
+
+						int _a = siteA-action;
+						int _b = siteB+action;
+						for (int requestsA=0;requestsA<21;requestsA++) {
+							int rent_a = Math.min(requestsA, _a);
+							for (int returnsA=0;returnsA<21;returnsA++) {
+								int __a = Math.min(_a - rent_a + returnsA, 20);
+								for (int requestsB=0;requestsB<21;requestsB++) {
+									int rent_b = Math.min(requestsB, _b);
+									for (int returnsB=0;returnsB<21;returnsB++) {
+										int __b = Math.min(_b - rent_b + returnsB, 20);
+
+										int statePrimeIndex = __b + __a * 21;
+										stateTPM[stateIndex][action_t][statePrimeIndex] += probsReqRetAB[requestsA][returnsA][requestsB][returnsB];
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 		for (int state_t=0; state_t<sizeS; state_t++) {
 			for (int action_t=0; action_t<sizeA; action_t++) {
 				Assert.assertArrayEquals(stateTPM[state_t][action_t], markovDecisionProcess.getStateTransitionProbabilityMatrix()[state_t][action_t], 0.001d);
@@ -297,23 +309,52 @@ public class JacksCarRentalTest {
 		}
 	}
 
-//	public void printStateValues() {
-//		for (int value_t=0; value_t<sizeS; value_t++) {
-//			System.out.print(String.format("%+5.2f", markovDecisionProcess.getStateValue(value_t)));
-//			System.out.print("\t");
-//			if (value_t%21 == 20) System.out.println();
-//		}
-//	}
-//
-//	public void printPolicy() {
-//		for (int state_t=0; state_t<sizeS; state_t++) {
-//			for (int action_t=0; action_t<sizeA; action_t++) {
-//				if (markovDecisionProcess.getStatePolicy(state_t, action_t) > 0.0d) {
-//					System.out.print(markovDecisionProcess.getAction(action_t));
-//				}
-//			}
-//			System.out.print("\t");
-//			if (markovDecisionProcess.getState(state_t).B == 20) System.out.println();
-//		}
-//	}
+	@Test
+	public void testDiscount10Greedy() {
+		markovDecisionProcess.setUseBellmanMatrix(true);
+		//markovDecisionProcess.setDiscountFactor(1.0d);
+
+		printStateValues();
+		printPolicy();
+		System.out.println();
+		System.out.println();
+		markovDecisionProcess.evaluatePolicy_Greedy();
+		printStateValues();
+		printPolicy();
+		System.out.println();
+		System.out.println();
+		markovDecisionProcess.evaluatePolicy_Greedy();
+		printStateValues();
+		printPolicy();
+		System.out.println();
+		System.out.println();
+		markovDecisionProcess.evaluatePolicy_Greedy();
+		printStateValues();
+		printPolicy();
+		System.out.println();
+		System.out.println();
+		markovDecisionProcess.evaluatePolicy_Greedy();
+		printStateValues();
+		printPolicy();
+	}
+
+	public void printStateValues() {
+		for (int value_t=0; value_t<sizeS; value_t++) {
+			System.out.print(String.format("%+5.2f", markovDecisionProcess.getStateValue(value_t)));
+			System.out.print("\t");
+			if (value_t%21 == 20) System.out.println();
+		}
+	}
+
+	public void printPolicy() {
+		for (int state_t=0; state_t<sizeS; state_t++) {
+			for (int action_t=0; action_t<sizeA; action_t++) {
+				if (markovDecisionProcess.getStatePolicy(state_t, action_t) > 0.0d) {
+					System.out.print(markovDecisionProcess.getAction(action_t));
+				}
+			}
+			System.out.print("\t");
+			if (markovDecisionProcess.getState(state_t).B == 20) System.out.println();
+		}
+	}
 }
