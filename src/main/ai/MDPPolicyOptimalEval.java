@@ -215,6 +215,9 @@ public class MDPPolicyOptimalEval<S, A> {
 		policy[state_t][action_t] = probability;
 	}
 
+	public boolean isOptimal() {
+		return optimalPolicy;
+	}
 	public void evaluatePolicy_Greedy() {
 		// pi'(s) = argmax qpi(s, a) {a in A}
 		if (optimalPolicy) return;
