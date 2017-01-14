@@ -18,6 +18,7 @@ public class MDP<S, A> {
 		// R is a vector of rewards for each state / action combination
 		// Ras = E [Rt+1 | St = s, At = a]
 	private final double[][] policy;
+	private double[][] savedPolicy;
 		// pi is a distribution over actions given states
 	private double[] stateValues;
 		// v is a vector of values for each state
@@ -57,7 +58,9 @@ public class MDP<S, A> {
 
 	    this.rewards = new double[sizeS][sizeA];
 	    this.policy = new double[sizeS][sizeA];
+	    this.savedPolicy = new double[sizeS][sizeA];
 	    this.stateValues = new double[sizeS];
+	    this.actionValues = new double[sizeS][sizeA];
 	}
 
 	@SuppressWarnings("unchecked")
@@ -132,8 +135,8 @@ public class MDP<S, A> {
 	}
 	public void setDiscount(double discount) {
 		this.discount = discount;
-		this.valueFunctionOptimal = false;
 		this.policyFunctionOptimal = false;
+		resetStateValues();
 	}
 
 	public double[][] getRewards() {
@@ -167,23 +170,24 @@ public class MDP<S, A> {
 
 	public void setValueFunction(ValueFunction vf) {
 		valueFunction = vf;
-		valueFunctionOptimal = false;
 		policyFunctionOptimal = false;
+		resetStateValues();
+		resetActionValues();
 	}
 	public void setValueFunctionMax(double initialMax) {
 		valueFunctionMax = initialMax;
-		valueFunctionOptimal = false;
-		policyFunctionOptimal = false;
 	}
 	public void setValueFunctionDelta(double delta) {
 		valueFunctionDelta = delta;
-		valueFunctionOptimal = false;
 		policyFunctionOptimal = false;
+		resetStateValues();
+		resetActionValues();
 	}
 	public void setValueFunctionAttempts(long attempts) {
 		valueFunctionAttempts = attempts;
-		valueFunctionOptimal = false;
 		policyFunctionOptimal = false;
+		resetStateValues();
+		resetActionValues();
 	}
 
 	public void evaluateValueFunction() {
@@ -222,11 +226,21 @@ public class MDP<S, A> {
 	public void setPolicy(int state_t, int action_t, double probability) {
 		policy[state_t][action_t] = probability;
 	}
+	public void savePolicy() {
+		savedPolicy = Arrays.copyOf(policy, policy.length);
+	}
+	public void restorePolicy() {
+		for (int state_t=0; state_t<st_length; state_t++) {
+			for (int action_t=0; action_t<at_length; action_t++) {
+				setPolicy(state_t, action_t, savedPolicy[state_t][action_t]);
+			}
+		}
+	}
 
 	public void improvePolicy() {
 		switch(policyFunction) {
 			case GREEDY:
-				improvePolicy_Greedy();
+				improvePolicyGreedy();
 				break;
 		}
 	}
@@ -249,6 +263,7 @@ public class MDP<S, A> {
 	}
 	public void resetStateValues() {
 		stateValues = new double[st_length];
+		valueFunctionOptimal = false;
 	}
 
 	public double[][] getActionValues() {
@@ -263,6 +278,9 @@ public class MDP<S, A> {
 		return getActionValue(state_t, action_t);
 	}
 	public double getActionValue(int state_t, int action_t) {
+//		if (valueFunction.equals(ValueFunction.BELLMAN_MATRIX)) {
+//			actionFunction(state_t, action_t);
+//		}
 		return actionValues[state_t][action_t];
 	}
 	private void setActionValue(int state_t, int action_t, double value) {
@@ -275,7 +293,7 @@ public class MDP<S, A> {
 	private void valueFunctionBellmanEquation () {
 		// vpi(s) = sum(pi(a|s)qpi(s,a))
 		valueFunctionAttempts = 0;
-		while(valueFunctionOptimal) {
+		while(!valueFunctionOptimal) {
 			valueFunctionOptimal = true;
 			valueFunctionAttempts++;
 
@@ -295,7 +313,7 @@ public class MDP<S, A> {
 	private void valueFunctionBellmanOptimal () {
 		// v*(s) = max(q*(s, a)) {a in A}
 		valueFunctionAttempts = 0;
-		while(valueFunctionOptimal) {
+		while(!valueFunctionOptimal) {
 			valueFunctionOptimal = true;
 			valueFunctionAttempts++;
 
@@ -315,10 +333,12 @@ public class MDP<S, A> {
 	private void valueFunctionBellmanIterative () {
 		// vk+1(s) = sum(pi(a|s)Ras + y * sum(Pass'vk(s')  {s' in S}))
 		for (int k=0; k<valueFunctionAttempts; k++) {
+			valueFunctionOptimal = true;
 			double stateValues_bk[] = Arrays.copyOf(stateValues, st_length);
 
 			for (int state_t=0; state_t<st_length; state_t++) {
 				double stateValue = 0.0d;
+				double currStateValue = stateValues[state_t];
 				for (int action_t=0; action_t<at_length; action_t++) {
 					double policy = getStatePolicy(state_t, action_t);
 					double reward = getReward(state_t, action_t);
@@ -331,6 +351,7 @@ public class MDP<S, A> {
 					stateValue += policy * getActionValue(state_t, action_t);
 				}
 				setStateValue(state_t, stateValue);
+				valueFunctionOptimal &= Util.doubleIsSame(currStateValue, getStateValue(state_t), valueFunctionDelta);
 			}
 		}
 	}
@@ -379,8 +400,11 @@ public class MDP<S, A> {
 				for (int col=0; col<len; col++) {
 					setStateValue(row, getStateValue(row) + Imatrix[row][col] * getReward(col, action_t) * getStatePolicy(col, action_t));
 				}
+//				actionFunction(row, action_t);
 			}
 		}
+		
+		valueFunctionOptimal = true;
 	}
 
 	private double actionFunction (int state_t, int action_t) {
@@ -389,15 +413,17 @@ public class MDP<S, A> {
 		for (int statePrime_t=0; statePrime_t<st_length; statePrime_t++) {
 			actionValue += getProbablilityStateStatePrime(state_t, action_t, statePrime_t) * getStateValue(statePrime_t);
 		}
-		setActionValue(state_t, action_t, getReward(state_t, action_t) + (discount * actionValue));
-		return getActionValue(state_t, action_t);
+		actionValue = getReward(state_t, action_t) + (discount * actionValue);
+		setActionValue(state_t, action_t, actionValue);
+		return actionValue;
 	}
 
 
-	private void improvePolicy_Greedy() {
+	private void improvePolicyGreedy() {
 		// pi'(s) = argmax qpi(s, a) {a in A}
 		if (policyFunctionOptimal) return;
 		policyFunctionOptimal = true;
+		valueFunctionOptimal = false;
 
 		for (int state_t=0; state_t<st_length; state_t++) {
 			double[] prevPolicy = policy[state_t];
@@ -422,6 +448,7 @@ public class MDP<S, A> {
 				policyFunctionOptimal &= Util.doubleIsSame(prevPolicy[action_t], getStatePolicy(state_t, action_t), valueFunctionDelta);
 			}
 		}
+		resetStateValues();
 	}
 
 

@@ -35,13 +35,14 @@ public class Util {
     			amx_length = 1;
     	    	argMax = new int[amx_length];
     	    	argMax[0] = k;
+    	    	max = array[k];
     		}
     		else {
     			if (Util.doubleIsSame(array[k], max, delta)) {
     				amx_length++;
     				argMax = Arrays.copyOf(argMax, amx_length);
+        	    	argMax[amx_length-1] = k;
     			}
-    	    	argMax[amx_length-1] = k;
     		}
     	}
 
