@@ -323,5 +323,6 @@ public class GridWorldTest {
 		Assert.assertEquals(15.25, markovDecisionProcess.getStateValue(21), 0.01d);
 		Assert.assertEquals(13.30, markovDecisionProcess.getStateValue(22), 0.01d);
 		Assert.assertEquals(11.49, markovDecisionProcess.getStateValue(23), 0.01d);
-		Assert.assertEquals(9.79, markovDecisionProcess.getStateValue(24), 0.01d);	}
+		Assert.assertEquals(9.79, markovDecisionProcess.getStateValue(24), 0.01d);
+	}
 }
