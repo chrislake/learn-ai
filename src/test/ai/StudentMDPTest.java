@@ -75,7 +75,7 @@ public class StudentMDPTest {
 	@Test
 	public void testTPM() {
 		stateTPM[0][0][1] = 1.0d;
-		stateTPM[0][2][4] = 1.0d;
+		stateTPM[0][2][3] = 1.0d;
 		stateTPM[1][0][2] = 1.0d;
 		stateTPM[1][4][4] = 1.0d;
 		stateTPM[2][0][4] = 1.0d;
