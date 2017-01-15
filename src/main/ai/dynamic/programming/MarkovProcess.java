@@ -1,4 +1,4 @@
-package ai;
+package ai.dynamic.programming;
 
 public class MarkovProcess<S> {
 	private final Object[] states;

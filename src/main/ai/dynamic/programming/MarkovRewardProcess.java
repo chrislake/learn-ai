@@ -1,6 +1,8 @@
-package ai;
+package ai.dynamic.programming;
 
 import java.util.Arrays;
+
+import ai.Util;
 
 public class MarkovRewardProcess<S> {
 	private final Object[] states;

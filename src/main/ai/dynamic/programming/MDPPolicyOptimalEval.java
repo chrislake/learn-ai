@@ -1,25 +1,10 @@
-package ai;
+package ai.dynamic.programming;
 
 import java.util.Arrays;
 
-public class MDPPOJacksCarRental<S, A> {
-	public static class SiteState {
-		public int A = 0;
-		public int B = 0;
-		
-		SiteState (int a, int b) {
-			this.A = a;
-			this.B = b;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			if (!(obj instanceof SiteState)) return false;
-			SiteState siteState = (SiteState) obj;
-			return this.A == siteState.A && this.B == siteState.B;
-		}
-	}
+import ai.Util;
 
+public class MDPPolicyOptimalEval<S, A> {
 	private final Object[] states;
 		// S is a (finite) set of states
 	private final Object[] actions;
@@ -46,13 +31,13 @@ public class MDPPOJacksCarRental<S, A> {
 
 	private boolean optimalPolicy = false;
 
-	public MDPPOJacksCarRental(int sizeS, int sizeA) {
+	public MDPPolicyOptimalEval(int sizeS, int sizeA) {
 		this(sizeS, sizeA, 0.0d);
 	}
-	public MDPPOJacksCarRental(int sizeS, int sizeA, double discount) {
+	public MDPPolicyOptimalEval(int sizeS, int sizeA, double discount) {
 		this(sizeS, sizeA, discount, true);
 	}
-	public MDPPOJacksCarRental(int sizeS, int sizeA, double discount, boolean useBellmanMatrix) {
+	public MDPPolicyOptimalEval(int sizeS, int sizeA, double discount, boolean useBellmanMatrix) {
 	    this.states = new Object[sizeS];
 	    this.actions = new Object[sizeA];
 	    this.stateTransitionProbabilityMatrix = new double[sizeS][sizeA][sizeS];
@@ -179,8 +164,9 @@ public class MDPPOJacksCarRental<S, A> {
 		stateActionRewards[state_t][action_t] = reward;
 	}
 
-	public void setUseBellmanMatrix(boolean useMatrix) {
+	public void setUseBellmanMatrix(boolean useMatrix, double optimalStartMax) {
 		this.useMatrix = useMatrix;
+		this.valueInitMax = optimalStartMax;
 	}
 	public void setUseOptimalPolicy(boolean useOptimal, double optimalStartMax) {
 		this.useMatrix = false;
@@ -188,11 +174,12 @@ public class MDPPOJacksCarRental<S, A> {
 		this.useCount = false;
 		this.valueInitMax = optimalStartMax;
 	}
-	public void setUseCounterPolicy(int attempts) {
+	public void setUseCounterPolicy(int attempts, double optimalStartMax) {
 		useMatrix = false;
 		useOptimal = false;
 		useCount = true;
 		valueFunctionAttempts = attempts;
+		valueInitMax = optimalStartMax;
 	}
 
 	public double getExpectedReturn(S[] plannedStates, int state_t) {
@@ -230,6 +217,9 @@ public class MDPPOJacksCarRental<S, A> {
 		policy[state_t][action_t] = probability;
 	}
 
+	public boolean isOptimal() {
+		return optimalPolicy;
+	}
 	public void evaluatePolicy_Greedy() {
 		// pi'(s) = argmax qpi(s, a) {a in A}
 		if (optimalPolicy) return;
@@ -408,7 +398,7 @@ public class MDPPOJacksCarRental<S, A> {
 	}
 
 	private double actionFunctionBellmanOptimal (int state_t, int action_t) {
-		// qpi(s, a) = Ras + y * sum(Pass'v(s')  {s' in S}
+		// q*(s, a) = Ras + y * sum(Pass'v*(s')  {s' in S}
 		double stateValue = 0.0d;
 		for (int statePrime_t=0; statePrime_t<states.length; statePrime_t++) {
 			stateValue += getProbablilityStateStatePrime(state_t, action_t, statePrime_t) * stateValues[statePrime_t];

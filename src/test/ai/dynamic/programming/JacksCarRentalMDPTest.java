@@ -1,11 +1,13 @@
-package ai;
+package ai.dynamic.programming;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ai.MDP.ValueFunction;
-import ai.MDPPOJacksCarRental.SiteState;
+import ai.Util;
+import ai.dynamic.programming.MDP;
+import ai.dynamic.programming.MDP.ValueFunction;
+import ai.dynamic.programming.MDPPOJacksCarRental.SiteState;
 
 public class JacksCarRentalMDPTest {
 

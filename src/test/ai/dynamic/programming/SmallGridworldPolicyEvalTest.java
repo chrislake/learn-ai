@@ -1,8 +1,10 @@
-package ai;
+package ai.dynamic.programming;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import ai.dynamic.programming.MDPPolicyOptimalEval;
 
 public class SmallGridworldPolicyEvalTest {
 

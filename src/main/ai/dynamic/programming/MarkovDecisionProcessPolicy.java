@@ -1,8 +1,10 @@
-package ai;
+package ai.dynamic.programming;
 
 import java.util.Arrays;
 
-public class MarkovDecisionProcess<S, A> {
+import ai.Util;
+
+public class MarkovDecisionProcessPolicy<S, A> {
 	private final Object[] states;
 		// S is a (finite) set of states
 	private final Object[] actions;
@@ -15,6 +17,8 @@ public class MarkovDecisionProcess<S, A> {
 	private final double[][] stateActionRewards;
 		// R is a vector of rewards for each state / action combination
 		// Ras = E [Rt+1 | St = s, At = a]
+	private final double[][] policy;
+		// pi is a distribution over actions given states
 	private double[] stateValues;
 		// v is a vector of values for each state
 
@@ -22,19 +26,20 @@ public class MarkovDecisionProcess<S, A> {
 	private double valueFunctionPrecision = 0.000001d;
 	private int valueFunctionAttempts = 0;
 
-	public MarkovDecisionProcess(int sizeS, int sizeA) {
+	public MarkovDecisionProcessPolicy(int sizeS, int sizeA) {
 		this(sizeS, sizeA, 0.0d);
 	}
-	public MarkovDecisionProcess(int sizeS, int sizeA, double discount) {
+	public MarkovDecisionProcessPolicy(int sizeS, int sizeA, double discount) {
 		this(sizeS, sizeA, discount, true);
 	}
-	public MarkovDecisionProcess(int sizeS, int sizeA, double discount, boolean useBellmanMatrix) {
+	public MarkovDecisionProcessPolicy(int sizeS, int sizeA, double discount, boolean useBellmanMatrix) {
 	    this.states = new Object[sizeS];
 	    this.actions = new Object[sizeA];
 	    this.stateTransitionProbabilityMatrix = new double[sizeS][sizeA][sizeS];
 	    this.discountFactor = discount;
 
 	    this.stateActionRewards = new double[sizeS][sizeA];
+	    this.policy = new double[sizeS][sizeA];
 	    this.stateValues = new double[sizeS];
 
 	    this.useMatrix = useBellmanMatrix;
@@ -90,6 +95,23 @@ public class MarkovDecisionProcess<S, A> {
 		// Pss' = P [St+1 = s' | St = s, At = a]
 		return stateTransitionProbabilityMatrix[state_t][action_t][statePrime_t];
 	}
+	public double getProbablilityPolicyStateStatePrime (S state, S statePrime) {
+		double return_Ppissp = 0.0d;
+		for (int action_t=0; action_t<actions.length; action_t++) {
+			A action = getAction(action_t);
+			double policy = getStatePolicy(state, action);
+			return_Ppissp += policy * getProbablilityStateStatePrime(state, action, statePrime);
+		}
+		return return_Ppissp;
+	}
+	public double getProbablilityPolicyStateStatePrime (int state_t, int statePrime_t) {
+		double return_Ppissp = 0.0d;
+		for (int action_t=0; action_t<actions.length; action_t++) {
+			double policy = getStatePolicy(state_t, statePrime_t);
+			return_Ppissp += policy * getProbablilityStateStatePrime(state_t, action_t, statePrime_t);
+		}
+		return return_Ppissp;
+	}
 	public void setProbablilityStateStatePrime(int state, int action_t, int statePrime, double probablility) {
 		stateTransitionProbabilityMatrix[state][action_t][statePrime] = probablility;
 	}
@@ -115,6 +137,23 @@ public class MarkovDecisionProcess<S, A> {
 		// R is a reward function
 		return stateActionRewards[state_t][action_t];
 	}
+	public double getRewardPolicy(S state) {
+		double return_Rpis = 0.0d;
+		for (int action_t=0; action_t<actions.length; action_t++) {
+			A action = getAction(action_t);
+			double policy = getStatePolicy(state, action);
+			return_Rpis += policy * getReward(state, action);
+		}
+		return return_Rpis;
+	}
+	public double getRewardPolicy(int state_t) {
+		double return_Rpis = 0.0d;
+		for (int action_t=0; action_t<actions.length; action_t++) {
+			double policy = getStatePolicy(state_t, action_t);
+			return_Rpis += policy * getReward(state_t, action_t);
+		}
+		return return_Rpis;
+	}
 	public void setReward(int state_t, int action_t, double reward) {
 		stateActionRewards[state_t][action_t] = reward;
 	}
@@ -124,7 +163,7 @@ public class MarkovDecisionProcess<S, A> {
 	}
 
 	public double getExpectedReturn(S[] plannedStates, A[] plannedActions, int state_t) {
-		// v(s) = Epi[Gt | St=s]
+		// vpi(s) = Epi[Gt | St=s]
 		S[] sub_states = Arrays.copyOfRange(plannedStates, state_t, plannedStates.length);
 		A[] sub_actions = Arrays.copyOfRange(plannedActions, state_t, plannedActions.length);
 		return getExpectedReturn(sub_states, sub_actions);
@@ -143,6 +182,84 @@ public class MarkovDecisionProcess<S, A> {
 		return return_Gt;
 	}
 
+	public double[][] getPolicy() {
+		return policy;
+	}
+	public double getStatePolicy(S state, A action) {
+		//π(a|s) = P [At = a | St = s]
+		int state_t = getState_t(state);
+		int action_t = getAction_t(action);
+		return policy[state_t][action_t];
+	}
+	public double getStatePolicy(int state_t, int action_t) {
+		//π(a|s) = P [At = a | St = s]
+		return policy[state_t][action_t];
+	}
+	public void setPolicy(int state_t, int action_t, double probability) {
+		policy[state_t][action_t] = probability;
+	}
+
+//	@SuppressWarnings("unchecked")
+//	public double vpi(S s, int steps) {
+//		// vπ(s) = Eπ[Gt | St=s ]
+//		Object[] sub_episode = new Object[steps];
+//		sub_episode[0] = s;
+//		A a = getA(0);
+//		S sp = findSp(s, a);
+//		for (int t=1; t<steps; t++) {
+//			a = getA(0);
+//			sp = findSp(sp, a);
+//			sub_episode[t] = sp;
+//		}
+//		return Gt((S[])sub_episode);
+//	}
+//
+//	public S findSp(S s, A a) {
+//		int st = 0;
+//		for (; st<S.length; st++) {
+//			S St = getS(st);
+//			if (St.equals(s)) break;
+//		}
+//
+//		int at = 0;
+//		for (; at<A.length; at++) {
+//			A At = getA(at);
+//			if (At.equals(a)) break;
+//		}
+//
+//		double r = Math.random() + 0.000001d;
+//		double sum = 0.0d;
+//		for (int sp=0; sp<S.length; sp++) {
+//			double pr = P[st][at][sp];
+//			if (pr == 0.0d) continue;
+//
+//			if (pr == 1.0d) {
+//				return getS(sp);
+//			}
+//			else {
+//				if (sum < r && r <= sum+pr) {
+//					return getS(sp);
+//				}
+//			}
+//		}
+//
+//		return s;
+//	}
+//
+//	@SuppressWarnings("unchecked")
+//	public double qpi(S s, A a, int steps) {
+//		// qπ(s, a) = Eπ [Gt | St = s, At = a]
+//		Object[] sub_episode = new Object[steps];
+//		sub_episode[0] = s;
+//		S sp = findSp(s, a);
+//		for (int t=1; t<steps; t++) {
+//			A ap = getA(0);
+//			sp = findSp(sp, ap);
+//			sub_episode[t] = sp;
+//		}
+//		return Gt((S[])sub_episode);
+//	}
+
 	public void executeStateValueFunction() {
 		if (useMatrix) valueFunctionBellmanMatrix();
 		else valueFunctionBellmanEquation();
@@ -155,7 +272,7 @@ public class MarkovDecisionProcess<S, A> {
 	}
 
 	private void valueFunctionBellmanEquation () {
-		// v(s) = Ras + y * sum(Pass'v(s') { s' in S)
+		// vpi(s) = sum(pi(a|s)qpi(s,a))
 		stateValues = new double[stateValues.length];
 
 		boolean goAgain = true;
@@ -168,15 +285,22 @@ public class MarkovDecisionProcess<S, A> {
 				double stateValue = 0.0d;
 				double currStateValue = stateValues[state_t];
 				for (int action_t=0; action_t<actions.length; action_t++) {
-					for (int statePrime_t=0; statePrime_t<states.length; statePrime_t++) {
-						stateValue += getProbablilityStateStatePrime(state_t, action_t, statePrime_t) * stateValues[statePrime_t];
-					}
-					stateValue += getReward(state_t, action_t) + (discountFactor * stateValue);
+					double policy = getStatePolicy(state_t, action_t);
+					stateValue += policy * actionFunctionBellmanEquation(state_t, action_t);
 				}
 				stateValues[state_t] = stateValue;
 				goAgain |= Util.doubleIsDifferent(currStateValue, stateValues[state_t], valueFunctionPrecision);
 			}
 		}
+	}
+
+	private double actionFunctionBellmanEquation (int state_t, int action_t) {
+		// qpi(s, a) = Ras + y * sum(Pass'v(s')  {s' in S}
+		double stateValue = 0.0d;
+		for (int statePrime_t=0; statePrime_t<states.length; statePrime_t++) {
+			stateValue += getProbablilityStateStatePrime(state_t, action_t, statePrime_t) * stateValues[statePrime_t];
+		}
+		return getReward(state_t, action_t) + (discountFactor * stateValue);
 	}
 
 	private void valueFunctionBellmanMatrix() {
@@ -189,7 +313,7 @@ public class MarkovDecisionProcess<S, A> {
 		for (int row=0; row<len; row++) {
 			for (int col=0; col<len; col++) {
 				for (int action_t=0; action_t<actions.length; action_t++) {
-					matrix[row][col] += discountFactor * stateTransitionProbabilityMatrix[row][action_t][col];
+					matrix[row][col] += discountFactor * stateTransitionProbabilityMatrix[row][action_t][col] * getStatePolicy(row, action_t);
 				}
 				matrix[row][col] = Imatrix[row][col] - matrix[row][col];
 			}
@@ -221,7 +345,7 @@ public class MarkovDecisionProcess<S, A> {
 		for (int action_t=0; action_t<actions.length; action_t++) {
 			for (int row=0; row<len; row++) {
 				for (int col=0; col<len; col++) {
-					stateValues[row] += Imatrix[row][col] * getReward(col, action_t);
+					stateValues[row] += Imatrix[row][col] * getReward(col, action_t) * getStatePolicy(col, action_t);
 				}
 			}
 		}

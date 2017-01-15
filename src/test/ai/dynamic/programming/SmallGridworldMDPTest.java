@@ -1,10 +1,11 @@
-package ai;
+package ai.dynamic.programming;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ai.MDP.ValueFunction;
+import ai.dynamic.programming.MDP;
+import ai.dynamic.programming.MDP.ValueFunction;
 
 public class SmallGridworldMDPTest {
 

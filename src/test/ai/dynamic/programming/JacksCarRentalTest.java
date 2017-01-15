@@ -1,10 +1,12 @@
-package ai;
+package ai.dynamic.programming;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ai.MDPPOJacksCarRental.SiteState;
+import ai.Util;
+import ai.dynamic.programming.MDPPOJacksCarRental;
+import ai.dynamic.programming.MDPPOJacksCarRental.SiteState;
 
 public class JacksCarRentalTest {
 

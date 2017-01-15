@@ -1,10 +1,12 @@
-package ai;
+package ai.dynamic.programming;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class GridWorldTest {
+import ai.dynamic.programming.MDP;
+
+public class GridWorldMDPTest {
 
 	private final static int sizeS = 25;
 	private final static int sizeA = 4;
@@ -13,11 +15,11 @@ public class GridWorldTest {
 	private final double[][][] stateTPM = new double[sizeS][sizeA][sizeS];
 	private final double[][] rewards = new double[sizeS][sizeA];
 	private final double[][] policy = new double[sizeS][sizeA];
-	private static MDPPolicyOptimalEval<String, String> markovDecisionProcess;
+	private static MDP<String, String> markovDecisionProcess;
 
 	@BeforeClass
 	public static void generatemarkovDecisionProcess() {
-		markovDecisionProcess = new MDPPolicyOptimalEval<String, String>(sizeS, sizeA);
+		markovDecisionProcess = new MDP<String, String>(sizeS, sizeA);
 
 		markovDecisionProcess.setState(0, "1,1");
 		markovDecisionProcess.setState(1, "1,2");
@@ -169,6 +171,7 @@ public class GridWorldTest {
 		markovDecisionProcess.setReward(3, 1, 5.0d);
 		markovDecisionProcess.setReward(3, 2, 5.0d);
 		markovDecisionProcess.setReward(3, 3, 5.0d);
+		markovDecisionProcess.savePolicy();
 	}
 
 	@Test
@@ -214,8 +217,9 @@ public class GridWorldTest {
 			}
 		}
 
+		markovDecisionProcess.restorePolicy();
 		for (int state=0; state<sizeS; state++) {
-//			Assert.assertArrayEquals(policy[state], markovDecisionProcess.getPolicy()[state], 0.001d);
+			Assert.assertArrayEquals(policy[state], markovDecisionProcess.getPolicy()[state], 0.001d);
 			double sum = 0.0d;
 			for (int i=0; i<sizeA; i++) {
 				sum += markovDecisionProcess.getPolicy()[state][i];
@@ -226,10 +230,12 @@ public class GridWorldTest {
 
 	@Test
 	public void testDiscount10KGreedy() {
-		while (!markovDecisionProcess.isOptimal()) {
-			markovDecisionProcess.setUseCounterPolicy(100, Integer.MIN_VALUE);
-			markovDecisionProcess.setDiscountFactor(0.939d);
-			markovDecisionProcess.evaluatePolicy_Greedy();
+		markovDecisionProcess.setValueFunction(MDP.ValueFunction.BELLMAN_ITERATIVE);
+		markovDecisionProcess.setValueFunctionAttempts(100);
+		markovDecisionProcess.setDiscount(0.939d);
+		while (!markovDecisionProcess.isValueFunctionOptimal()) {
+			markovDecisionProcess.evaluateValueFunction();
+			markovDecisionProcess.improvePolicy();
 
 //			for (int state_t=0; state_t<sizeS; state_t++) {
 //				for (int action_t=0; action_t<sizeA; action_t++) {
@@ -295,30 +301,30 @@ public class GridWorldTest {
 		Assert.assertEquals(0.5d, markovDecisionProcess.getStatePolicy(24, 0), 0.1d);
 		Assert.assertEquals(0.5d, markovDecisionProcess.getStatePolicy(24, 2), 0.1d);
 
-		Assert.assertEquals(21.82, markovDecisionProcess.getStateValue(0), 0.01d);
-		Assert.assertEquals(24.30, markovDecisionProcess.getStateValue(1), 0.01d);
-		Assert.assertEquals(21.82, markovDecisionProcess.getStateValue(2), 0.01d);
-		Assert.assertEquals(19.30, markovDecisionProcess.getStateValue(3), 0.01d);
-		Assert.assertEquals(17.13, markovDecisionProcess.getStateValue(4), 0.01d);
-		Assert.assertEquals(19.49, markovDecisionProcess.getStateValue(5), 0.01d);
-		Assert.assertEquals(21.82, markovDecisionProcess.getStateValue(6), 0.01d);
-		Assert.assertEquals(19.49, markovDecisionProcess.getStateValue(7), 0.01d);
-		Assert.assertEquals(17.31, markovDecisionProcess.getStateValue(8), 0.01d);
-		Assert.assertEquals(15.25, markovDecisionProcess.getStateValue(9), 0.01d);
-		Assert.assertEquals(17.31, markovDecisionProcess.getStateValue(10), 0.01d);
-		Assert.assertEquals(19.49, markovDecisionProcess.getStateValue(11), 0.01d);
-		Assert.assertEquals(17.31, markovDecisionProcess.getStateValue(12), 0.01d);
-		Assert.assertEquals(15.25, markovDecisionProcess.getStateValue(13), 0.01d);
-		Assert.assertEquals(13.30, markovDecisionProcess.getStateValue(14), 0.01d);
-		Assert.assertEquals(15.25, markovDecisionProcess.getStateValue(15), 0.01d);
-		Assert.assertEquals(17.31, markovDecisionProcess.getStateValue(16), 0.01d);
-		Assert.assertEquals(15.25, markovDecisionProcess.getStateValue(17), 0.01d);
-		Assert.assertEquals(13.30, markovDecisionProcess.getStateValue(18), 0.01d);
-		Assert.assertEquals(11.49, markovDecisionProcess.getStateValue(19), 0.01d);
-		Assert.assertEquals(13.30, markovDecisionProcess.getStateValue(20), 0.01d);
-		Assert.assertEquals(15.25, markovDecisionProcess.getStateValue(21), 0.01d);
-		Assert.assertEquals(13.30, markovDecisionProcess.getStateValue(22), 0.01d);
-		Assert.assertEquals(11.49, markovDecisionProcess.getStateValue(23), 0.01d);
-		Assert.assertEquals(9.79, markovDecisionProcess.getStateValue(24), 0.01d);
+		Assert.assertEquals(21.86, markovDecisionProcess.getStateValue(0), 0.01d);
+		Assert.assertEquals(24.35, markovDecisionProcess.getStateValue(1), 0.01d);
+		Assert.assertEquals(21.86, markovDecisionProcess.getStateValue(2), 0.01d);
+		Assert.assertEquals(19.35, markovDecisionProcess.getStateValue(3), 0.01d);
+		Assert.assertEquals(17.17, markovDecisionProcess.getStateValue(4), 0.01d);
+		Assert.assertEquals(19.53, markovDecisionProcess.getStateValue(5), 0.01d);
+		Assert.assertEquals(21.86, markovDecisionProcess.getStateValue(6), 0.01d);
+		Assert.assertEquals(19.53, markovDecisionProcess.getStateValue(7), 0.01d);
+		Assert.assertEquals(17.34, markovDecisionProcess.getStateValue(8), 0.01d);
+		Assert.assertEquals(15.28, markovDecisionProcess.getStateValue(9), 0.01d);
+		Assert.assertEquals(17.34, markovDecisionProcess.getStateValue(10), 0.01d);
+		Assert.assertEquals(19.53, markovDecisionProcess.getStateValue(11), 0.01d);
+		Assert.assertEquals(17.34, markovDecisionProcess.getStateValue(12), 0.01d);
+		Assert.assertEquals(15.28, markovDecisionProcess.getStateValue(13), 0.01d);
+		Assert.assertEquals(13.35, markovDecisionProcess.getStateValue(14), 0.01d);
+		Assert.assertEquals(15.28, markovDecisionProcess.getStateValue(15), 0.01d);
+		Assert.assertEquals(17.34, markovDecisionProcess.getStateValue(16), 0.01d);
+		Assert.assertEquals(15.28, markovDecisionProcess.getStateValue(17), 0.01d);
+		Assert.assertEquals(13.35, markovDecisionProcess.getStateValue(18), 0.01d);
+		Assert.assertEquals(11.53, markovDecisionProcess.getStateValue(19), 0.01d);
+		Assert.assertEquals(13.35, markovDecisionProcess.getStateValue(20), 0.01d);
+		Assert.assertEquals(15.28, markovDecisionProcess.getStateValue(21), 0.01d);
+		Assert.assertEquals(13.35, markovDecisionProcess.getStateValue(22), 0.01d);
+		Assert.assertEquals(11.53, markovDecisionProcess.getStateValue(23), 0.01d);
+		Assert.assertEquals(9.83, markovDecisionProcess.getStateValue(24), 0.01d);
 	}
 }

@@ -1,10 +1,13 @@
-package ai;
+package ai.dynamic.programming;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class ShortestPathTest {
+import ai.dynamic.programming.MDP;
+import ai.dynamic.programming.MDP.ValueFunction;
+
+public class ShortestPathMDPTest {
 
 	private final static int sizeS = 16;
 	private final static int sizeA = 4;
@@ -13,13 +16,13 @@ public class ShortestPathTest {
 	private final double[][][] stateTPM = new double[sizeS][sizeA][sizeS];
 	private final double[][] rewards = new double[sizeS][sizeA];
 	private final double[][] policy = new double[sizeS][sizeA];
-	private static MDPPolicyOptimalEval<String, String> markovDecisionProcess;
+	private static MDP<String, String> markovDecisionProcess;
 
 	@BeforeClass
 	public static void generatemarkovDecisionProcess() {
 		int sizeS = 16;
 		int sizeA = 4;
-		markovDecisionProcess = new MDPPolicyOptimalEval<String, String>(sizeS, sizeA);
+		markovDecisionProcess = new MDP<String, String>(sizeS, sizeA);
 
 		markovDecisionProcess.setState(0, "1,1"); // terminal
 		markovDecisionProcess.setState(1, "1,2");
@@ -113,6 +116,8 @@ public class ShortestPathTest {
 				markovDecisionProcess.setPolicy(state_t, action_t, 0.25d);
 			}
 		}
+		
+		markovDecisionProcess.savePolicy();
 	}
 
 	@Test
@@ -252,8 +257,9 @@ public class ShortestPathTest {
 		policy[0][2] = 0.0d;
 		policy[0][3] = 0.0d;
 
+		markovDecisionProcess.restorePolicy();
 		for (int state=0; state<sizeS; state++) {
-//			Assert.assertArrayEquals(policy[state], markovDecisionProcess.getPolicy()[state], 0.001d);
+			Assert.assertArrayEquals(policy[state], markovDecisionProcess.getPolicy()[state], 0.001d);
 			double sum = 0.0d;
 			for (int i=0; i<sizeA; i++) {
 				sum += markovDecisionProcess.getPolicy()[state][i];
@@ -264,9 +270,12 @@ public class ShortestPathTest {
 
 	@Test
 	public void testDiscount10CountK0() {
-		markovDecisionProcess.setUseCounterPolicy(0, -1000);
-		markovDecisionProcess.setDiscountFactor(1.0d);
-		markovDecisionProcess.evaluatePolicy_Greedy();
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
+		markovDecisionProcess.setValueFunctionAttempts(0);
+		markovDecisionProcess.setDiscount(1.0d);
+		markovDecisionProcess.evaluateValueFunction();
+		markovDecisionProcess.improvePolicy();
+		markovDecisionProcess.evaluateValueFunction();
 		Assert.assertEquals(0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(0.0d, markovDecisionProcess.getStateValue(1), 0.1d);
 		Assert.assertEquals(0.0d, markovDecisionProcess.getStateValue(2), 0.1d);
@@ -287,9 +296,12 @@ public class ShortestPathTest {
 
 	@Test
 	public void testDiscount10CountK1() {
-		markovDecisionProcess.setUseCounterPolicy(1, -1000);
-		markovDecisionProcess.setDiscountFactor(1.0d);
-		markovDecisionProcess.evaluatePolicy_Greedy();
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
+		markovDecisionProcess.setValueFunctionAttempts(1);
+		markovDecisionProcess.setDiscount(1.0d);
+		markovDecisionProcess.evaluateValueFunction();
+		markovDecisionProcess.improvePolicy();
+		markovDecisionProcess.evaluateValueFunction();
 		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(-1.0d, markovDecisionProcess.getStateValue(1), 0.1d);
 		Assert.assertEquals(-1.0d, markovDecisionProcess.getStateValue(2), 0.1d);
@@ -310,9 +322,13 @@ public class ShortestPathTest {
 
 	@Test
 	public void testDiscount10CountK2() {
-		markovDecisionProcess.setUseCounterPolicy(2, -1000);
-		markovDecisionProcess.setDiscountFactor(1.0d);
-		markovDecisionProcess.evaluatePolicy_Greedy();
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
+		markovDecisionProcess.setValueFunctionAttempts(2);
+		markovDecisionProcess.setDiscount(1.0d);
+		markovDecisionProcess.evaluateValueFunction();
+		markovDecisionProcess.improvePolicy();
+		markovDecisionProcess.resetStateValues();
+		markovDecisionProcess.evaluateValueFunction();
 		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(-1.0d, markovDecisionProcess.getStateValue(1), 0.1d);
 		Assert.assertEquals(-2.0d, markovDecisionProcess.getStateValue(2), 0.1d);
@@ -333,9 +349,12 @@ public class ShortestPathTest {
 
 	@Test
 	public void testDiscount10CountK3() {
-		markovDecisionProcess.setUseCounterPolicy(3, -1000);
-		markovDecisionProcess.setDiscountFactor(1.0d);
-		markovDecisionProcess.evaluatePolicy_Greedy();
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
+		markovDecisionProcess.setValueFunctionAttempts(3);
+		markovDecisionProcess.setDiscount(1.0d);
+		markovDecisionProcess.evaluateValueFunction();
+		markovDecisionProcess.improvePolicy();
+		markovDecisionProcess.evaluateValueFunction();
 		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(-1.0d, markovDecisionProcess.getStateValue(1), 0.1d);
 		Assert.assertEquals(-2.0d, markovDecisionProcess.getStateValue(2), 0.1d);
@@ -356,9 +375,12 @@ public class ShortestPathTest {
 
 	@Test
 	public void testDiscount10CountK4() {
-		markovDecisionProcess.setUseCounterPolicy(4, -1000);
-		markovDecisionProcess.setDiscountFactor(1.0d);
-		markovDecisionProcess.evaluatePolicy_Greedy();
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
+		markovDecisionProcess.setValueFunctionAttempts(4);
+		markovDecisionProcess.setDiscount(1.0d);
+		markovDecisionProcess.evaluateValueFunction();
+		markovDecisionProcess.improvePolicy();
+		markovDecisionProcess.evaluateValueFunction();
 		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(-1.0d, markovDecisionProcess.getStateValue(1), 0.1d);
 		Assert.assertEquals(-2.0d, markovDecisionProcess.getStateValue(2), 0.1d);
@@ -379,9 +401,12 @@ public class ShortestPathTest {
 
 	@Test
 	public void testDiscount10CountK5() {
-		markovDecisionProcess.setUseCounterPolicy(5, -1000);
-		markovDecisionProcess.setDiscountFactor(1.0d);
-		markovDecisionProcess.evaluatePolicy_Greedy();
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
+		markovDecisionProcess.setValueFunctionAttempts(5);
+		markovDecisionProcess.setDiscount(1.0d);
+		markovDecisionProcess.evaluateValueFunction();
+		markovDecisionProcess.improvePolicy();
+		markovDecisionProcess.evaluateValueFunction();
 		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(-1.0d, markovDecisionProcess.getStateValue(1), 0.1d);
 		Assert.assertEquals(-2.0d, markovDecisionProcess.getStateValue(2), 0.1d);
@@ -402,9 +427,12 @@ public class ShortestPathTest {
 
 	@Test
 	public void testDiscount10CountK6() {
-		markovDecisionProcess.setUseCounterPolicy(6, -1000);
-		markovDecisionProcess.setDiscountFactor(1.0d);
-		markovDecisionProcess.evaluatePolicy_Greedy();
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
+		markovDecisionProcess.setValueFunctionAttempts(6);
+		markovDecisionProcess.setDiscount(1.0d);
+		markovDecisionProcess.evaluateValueFunction();
+		markovDecisionProcess.improvePolicy();
+		markovDecisionProcess.evaluateValueFunction();
 		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue(0), 0.1d);
 		Assert.assertEquals(-1.0d, markovDecisionProcess.getStateValue(1), 0.1d);
 		Assert.assertEquals(-2.0d, markovDecisionProcess.getStateValue(2), 0.1d);
