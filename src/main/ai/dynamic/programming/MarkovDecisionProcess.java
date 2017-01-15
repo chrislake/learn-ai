@@ -31,15 +31,15 @@ public class MarkovDecisionProcess<S, A> {
 		this(sizeS, sizeA, discount, true);
 	}
 	public MarkovDecisionProcess(int sizeS, int sizeA, double discount, boolean useBellmanMatrix) {
-	    this.states = new Object[sizeS];
-	    this.actions = new Object[sizeA];
-	    this.stateTransitionProbabilityMatrix = new double[sizeS][sizeA][sizeS];
-	    this.discountFactor = discount;
+		this.states = new Object[sizeS];
+		this.actions = new Object[sizeA];
+		this.stateTransitionProbabilityMatrix = new double[sizeS][sizeA][sizeS];
+		this.discountFactor = discount;
 
-	    this.stateActionRewards = new double[sizeS][sizeA];
-	    this.stateValues = new double[sizeS];
+		this.stateActionRewards = new double[sizeS][sizeA];
+		this.stateValues = new double[sizeS];
 
-	    this.useMatrix = useBellmanMatrix;
+		this.useMatrix = useBellmanMatrix;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -89,7 +89,7 @@ public class MarkovDecisionProcess<S, A> {
 		return stateTransitionProbabilityMatrix[state_t][action_t][statePrime_t];
 	}
 	public double getProbablilityStateStatePrime (int state_t, int action_t, int statePrime_t) {
-		// Pss' = P [St+1 = s' | St = s, At = a]
+		// Pass' = P [St+1 = s' | St = s, At = a]
 		return stateTransitionProbabilityMatrix[state_t][action_t][statePrime_t];
 	}
 	public void setProbablilityStateStatePrime(int state, int action_t, int statePrime, double probablility) {
@@ -125,20 +125,22 @@ public class MarkovDecisionProcess<S, A> {
 		this.useMatrix = useMatrix;
 	}
 
-	public double getExpectedReturn(S[] plannedStates, A[] plannedActions, int state_t) {
-		// v(s) = Epi[Gt | St=s]
-		S[] sub_states = Arrays.copyOfRange(plannedStates, state_t, plannedStates.length);
-		A[] sub_actions = Arrays.copyOfRange(plannedActions, state_t, plannedActions.length);
-		return getExpectedReturn(sub_states, sub_actions);
+	public double getExpectedReturn(S[] plannedEpisode, int state_t) {
+		// v(s) = E[Gt | St=s]
+		S[] sub_episode = Arrays.copyOfRange(plannedEpisode, state_t, plannedEpisode.length);
+		return getExpectedReturn(sub_episode);
 	}
 
-	public double getExpectedReturn(S[] plannedStates, A[] plannedActions) {
+	public double getExpectedReturn(S[] plannedEpisode) {
 		// Gt = Rt+1 + yRt+2 + ... = sum(y^k * Rt+k+1) { 0 <= k < inf)
 		double return_Gt = 0.0;
-		for (int k=0; k<plannedStates.length; k++) {
-			S state = plannedStates[k];
-			A action = plannedActions[k];
-			double reward_t = getReward(state, action);
+		for (int k=0; k<plannedEpisode.length; k++) {
+			S state = plannedEpisode[k];
+			double reward_t = 0.0d;
+			for (int action_t=0; action_t<actions.length;action_t++) {
+				A action = getAction(action_t);
+				reward_t += getReward(state, action) / actions.length;
+			}
 			return_Gt += Math.pow(discountFactor, k) * reward_t;
 		}
 
@@ -182,7 +184,7 @@ public class MarkovDecisionProcess<S, A> {
 	}
 
 	private void valueFunctionBellmanMatrix() {
-		// vpi = (I − yPpi)^−1 Rpi
+		// v = (I - yP)^-1 R
 		int len = states.length;
 		stateValues = new double[stateValues.length];
 

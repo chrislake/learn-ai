@@ -8,8 +8,8 @@ public class MarkovProcess<S> {
 		// Pss' = P [St+1 = s' | St = s]
 
 	public MarkovProcess(int size) {
-	    this.states = new Object[size];
-	    this.stateTransitionProbabilityMatrix = new double[size][size];
+		this.states = new Object[size];
+		this.stateTransitionProbabilityMatrix = new double[size][size];
 	}
 
 	@SuppressWarnings("unchecked")
@@ -35,9 +35,9 @@ public class MarkovProcess<S> {
 	}
 	public double getProbablilityStateStatePrime (S state, S statePrime) {
 		// Pss' = P [St+1 = s' | St = s]
-		int t = getState_t(state);
-		int tp = getState_t(statePrime);
-		return stateTransitionProbabilityMatrix[t][tp];
+		int state_t = getState_t(state);
+		int statePrime_t = getState_t(statePrime);
+		return stateTransitionProbabilityMatrix[state_t][statePrime_t];
 	}
 	public double getProbablilityStateStatePrime (int state_t, int statePrime_t) {
 		// Pss' = P [St+1 = s' | St = s]

@@ -29,14 +29,14 @@ public class MarkovRewardProcess<S> {
 		this(size, discount, true);
 	}
 	public MarkovRewardProcess(int size, double discount, boolean useBellmanMatrix) {
-	    this.states = new Object[size];
-	    this.stateTransitionProbabilityMatrix = new double[size][size];
-	    this.discountFactor = discount;
+		this.states = new Object[size];
+		this.stateTransitionProbabilityMatrix = new double[size][size];
+		this.discountFactor = discount;
 
-	    this.stateRewards = new double[size];
-	    this.stateValues = new double[size];
+		this.stateRewards = new double[size];
+		this.stateValues = new double[size];
 
-	    this.useMatrix = useBellmanMatrix;
+		this.useMatrix = useBellmanMatrix;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -87,7 +87,8 @@ public class MarkovRewardProcess<S> {
 	}
 	public double getReward(S state) {
 		// R is a reward function
-		return stateRewards[getState_t(state)];
+		int state_t = getState_t(state);
+		return stateRewards[state_t];
 	}
 	public double getReward(int state_t) {
 		// R is a reward function
@@ -152,8 +153,8 @@ public class MarkovRewardProcess<S> {
 		}
 	}
 
-    private void valueFunctionBellmanMatrix() {
-    	// v = (I − yP)^−1 R
+	private void valueFunctionBellmanMatrix() {
+		// v = (I - yP)^-1 R
 		int len = states.length;
 		stateValues = new double[stateValues.length];
 

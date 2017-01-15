@@ -35,16 +35,16 @@ public class MarkovDecisionProcessPolicyOptimal<S, A> {
 		this(sizeS, sizeA, discount, true);
 	}
 	public MarkovDecisionProcessPolicyOptimal(int sizeS, int sizeA, double discount, boolean useBellmanMatrix) {
-	    this.states = new Object[sizeS];
-	    this.actions = new Object[sizeA];
-	    this.stateTransitionProbabilityMatrix = new double[sizeS][sizeA][sizeS];
-	    this.discountFactor = discount;
+		this.states = new Object[sizeS];
+		this.actions = new Object[sizeA];
+		this.stateTransitionProbabilityMatrix = new double[sizeS][sizeA][sizeS];
+		this.discountFactor = discount;
 
-	    this.stateActionRewards = new double[sizeS][sizeA];
-	    this.policy = new double[sizeS][sizeA];
-	    this.stateValues = new double[sizeS];
+		this.stateActionRewards = new double[sizeS][sizeA];
+		this.policy = new double[sizeS][sizeA];
+		this.stateValues = new double[sizeS];
 
-	    this.useMatrix = useBellmanMatrix;
+		this.useMatrix = useBellmanMatrix;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -94,7 +94,7 @@ public class MarkovDecisionProcessPolicyOptimal<S, A> {
 		return stateTransitionProbabilityMatrix[state_t][action_t][statePrime_t];
 	}
 	public double getProbablilityStateStatePrime (int state_t, int action_t, int statePrime_t) {
-		// Pss' = P [St+1 = s' | St = s, At = a]
+		// Pass' = P [St+1 = s' | St = s, At = a]
 		return stateTransitionProbabilityMatrix[state_t][action_t][statePrime_t];
 	}
 	public double getProbablilityPolicyStateStatePrime (S state, S statePrime) {
@@ -169,17 +169,17 @@ public class MarkovDecisionProcessPolicyOptimal<S, A> {
 		this.valueInitMax = optimalStartMax;
 	}
 
-	public double getExpectedReturn(S[] plannedStates, int state_t) {
+	public double getExpectedReturn(S[] plannedEpisode, int state_t) {
 		// vpi(s) = Epi[Gt | St=s]
-		S[] sub_states = Arrays.copyOfRange(plannedStates, state_t, plannedStates.length);
-		return getExpectedReturn(sub_states);
+		S[] sub_episode = Arrays.copyOfRange(plannedEpisode, state_t, plannedEpisode.length);
+		return getExpectedReturn(sub_episode);
 	}
 
-	public double getExpectedReturn(S[] plannedStates) {
+	public double getExpectedReturn(S[] plannedEpisode) {
 		// Gt = Rt+1 + yRt+2 + ... = sum(y^k * Rt+k+1) { 0 <= k < inf)
 		double return_Gt = 0.0;
-		for (int k=0; k<plannedStates.length; k++) {
-			S state = plannedStates[k];
+		for (int k=0; k<plannedEpisode.length; k++) {
+			S state = plannedEpisode[k];
 			double reward_t = getRewardPolicy(state);
 			return_Gt += Math.pow(discountFactor, k) * reward_t;
 		}
@@ -191,13 +191,13 @@ public class MarkovDecisionProcessPolicyOptimal<S, A> {
 		return policy;
 	}
 	public double getStatePolicy(S state, A action) {
-		//π(a|s) = P [At = a | St = s]
+		//pi(a|s) = P [At = a | St = s]
 		int state_t = getState_t(state);
 		int action_t = getAction_t(action);
 		return policy[state_t][action_t];
 	}
 	public double getStatePolicy(int state_t, int action_t) {
-		//π(a|s) = P [At = a | St = s]
+		//pi(a|s) = P [At = a | St = s]
 		return policy[state_t][action_t];
 	}
 	public void setPolicy(int state_t, int action_t, double probability) {
@@ -206,7 +206,7 @@ public class MarkovDecisionProcessPolicyOptimal<S, A> {
 
 //	@SuppressWarnings("unchecked")
 //	public double vpi(S s, int steps) {
-//		// vπ(s) = Eπ[Gt | St=s ]
+//		// vpi(s) = Epi[Gt | St=s ]
 //		Object[] sub_episode = new Object[steps];
 //		sub_episode[0] = s;
 //		A a = getA(0);
@@ -253,7 +253,7 @@ public class MarkovDecisionProcessPolicyOptimal<S, A> {
 //
 //	@SuppressWarnings("unchecked")
 //	public double qpi(S s, A a, int steps) {
-//		// qπ(s, a) = Eπ [Gt | St = s, At = a]
+//		// qpi(s, a) = Epi [Gt | St = s, At = a]
 //		Object[] sub_episode = new Object[steps];
 //		sub_episode[0] = s;
 //		S sp = findSp(s, a);
@@ -343,7 +343,7 @@ public class MarkovDecisionProcessPolicyOptimal<S, A> {
 	}
 
 	private double actionFunctionBellmanOptimal (int state_t, int action_t) {
-		// qpi(s, a) = Ras + y * sum(Pass'v(s')  {s' in S}
+		// q*(s, a) = Ras + y * sum(Pass'v(s')  {s' in S}
 		double stateValue = 0.0d;
 		for (int statePrime_t=0; statePrime_t<states.length; statePrime_t++) {
 			stateValue += getProbablilityStateStatePrime(state_t, action_t, statePrime_t) * stateValues[statePrime_t];
@@ -352,7 +352,7 @@ public class MarkovDecisionProcessPolicyOptimal<S, A> {
 	}
 
 	private void valueFunctionBellmanMatrix() {
-		// vpi = (I − yPpi)^−1 Rpi
+		// vpi = (I - yPpi)^-1 Rpi
 		int len = states.length;
 		stateValues = new double[stateValues.length];
 

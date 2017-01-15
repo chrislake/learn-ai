@@ -51,18 +51,18 @@ public class MDP<S, A> {
 	}
 
 	public MDP(int sizeS, int sizeA, double discount) {
-	    this.st_length = sizeS;
+		this.st_length = sizeS;
 		this.states = new Object[st_length];
-	    this.at_length = sizeA;
-	    this.actions = new Object[at_length];
-	    this.transitions = new double[sizeS][sizeA][sizeS];
-	    this.discount = discount;
+		this.at_length = sizeA;
+		this.actions = new Object[at_length];
+		this.transitions = new double[sizeS][sizeA][sizeS];
+		this.discount = discount;
 
-	    this.rewards = new double[sizeS][sizeA];
-	    this.policy = new double[sizeS][sizeA];
-	    this.savedPolicy = new double[sizeS][sizeA];
-	    this.stateValues = new double[sizeS];
-	    this.actionValues = new double[sizeS][sizeA];
+		this.rewards = new double[sizeS][sizeA];
+		this.policy = new double[sizeS][sizeA];
+		this.savedPolicy = new double[sizeS][sizeA];
+		this.stateValues = new double[sizeS];
+		this.actionValues = new double[sizeS][sizeA];
 	}
 
 	@SuppressWarnings("unchecked")
@@ -166,6 +166,11 @@ public class MDP<S, A> {
 		}
 		return return_Rpis;
 	}
+	public void setReward(S state, A action, double reward) {
+		int state_t = getState_t(state);
+		int action_t = getAction_t(action);
+		setReward(state_t, action_t, reward);
+	}
 	public void setReward(int state_t, int action_t, double reward) {
 		rewards[state_t][action_t] = reward;
 	}
@@ -206,7 +211,7 @@ public class MDP<S, A> {
 			case BELLMAN_ITERATIVE:
 				valueFunctionBellmanIterative();
 				break;
-		}
+			}
 	}
 	public boolean isValueFunctionOptimal() {
 		return valueFunctionOptimal;
@@ -260,7 +265,7 @@ public class MDP<S, A> {
 	public double getStateValue(int state_t) {
 		return stateValues[state_t];
 	}
-	private void setStateValue(int state_t, double value) {
+	protected void setStateValue(int state_t, double value) {
 		stateValues[state_t] = value;
 	}
 	public void resetStateValues() {
@@ -280,12 +285,9 @@ public class MDP<S, A> {
 		return getActionValue(state_t, action_t);
 	}
 	public double getActionValue(int state_t, int action_t) {
-//		if (valueFunction.equals(ValueFunction.BELLMAN_MATRIX)) {
-//			actionFunction(state_t, action_t);
-//		}
 		return actionValues[state_t][action_t];
 	}
-	private void setActionValue(int state_t, int action_t, double value) {
+	protected void setActionValue(int state_t, int action_t, double value) {
 		actionValues[state_t][action_t] = value;
 	}
 	public void resetActionValues() {
@@ -409,7 +411,7 @@ public class MDP<S, A> {
 				actionFunction(state_t, action_t);
 			}
 		}
-		
+
 		valueFunctionOptimal = true;
 	}
 
@@ -423,7 +425,6 @@ public class MDP<S, A> {
 		setActionValue(state_t, action_t, actionValue);
 		return actionValue;
 	}
-
 
 	private void improvePolicyGreedy() {
 		// pi'(s) = argmax qpi(s, a) {a in A}
@@ -441,7 +442,7 @@ public class MDP<S, A> {
 			for (int k=0; k<amx_length; k++) {
 				int action_t=argMax[k];
 				setPolicy(state_t, action_t, 1.0d/amx_length);
-				
+
 			}
 
 			for (int action_t=0; action_t<at_length; action_t++) {
@@ -451,5 +452,16 @@ public class MDP<S, A> {
 		resetStateValues();
 	}
 
+	public double getExpectedReturn(int[] episode_steps, int index) {
+		// vpi(s) = Epi[Gt | St=s]
+		double return_Gt = 0.0;
+		for (int t=index; t<episode_steps.length; t++) {
+			int state_t = episode_steps[t];
+			if (state_t == -1) break;
 
+			double reward_t = getRewardPolicy(state_t);
+			return_Gt += Math.pow(discount, t) * reward_t;
+		}
+		return return_Gt;
+	}
 }
