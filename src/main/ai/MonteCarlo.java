@@ -19,15 +19,15 @@ public class MonteCarlo<S, A> extends MDP<S, A> {
 	public void evaluateValueFuntion(int[] episode_steps) {
 		switch(type) {
 			case ONE_TIME:
-				evaluateValueFuntionOnce(episode_steps);
+				valueFuntionOnce(episode_steps);
 				break;
 			case EVERY_TIME:
-				evaluateValueFuntionEverytime(episode_steps);
+				valueFuntionEverytime(episode_steps);
 				break;
 		}
 	}
 
-	public void evaluateValueFuntionOnce(int[] episode_steps) {
+	public void valueFuntionOnce(int[] episode_steps) {
 		// V(s) = Vpi(s) as N(s) = inf
 		boolean[] flagged = new boolean[stateCounts.length];
 		for (int t=0; t<episode_steps.length; t++) {
@@ -43,7 +43,7 @@ public class MonteCarlo<S, A> extends MDP<S, A> {
 		}
 	}
 
-	public void evaluateValueFuntionEverytime(int[] episode_steps) {
+	public void valueFuntionEverytime(int[] episode_steps) {
 		// V(s) = Vpi(s) as N(s) = inf
 		for (int t=0; t<episode_steps.length; t++) {
 			int state_t = episode_steps[t];
