@@ -6,10 +6,10 @@ import ai.Util;
 
 public class MDP<S, A> {
 	private final Object[] states;
-	private final int st_length;
+	protected final int st_length;
 		// S is a (finite) set of states
 	private final Object[] actions;
-	private final int at_length;
+	protected final int at_length;
 		// A is a finite set of actions
 	private final double[][][] transitions;
 		// P is a state transition probability matrix

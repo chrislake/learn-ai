@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-public final class BlackJack {
+public final class BlackJackAlpha {
 	public static class State {
 		int currentSum;
 		int dealersCard;
@@ -31,13 +31,13 @@ public final class BlackJack {
 		}
 	}
 
-	int[] episodes = new int[10000];
+	int[] episodes = new int[500000];
 	int[] env_cards = new int[4];
 
 	@Test
 	public void play() {
 		int episode = 0;
-		MonteCarlo<State, String> agent = new MonteCarlo<State, String>(200, 2);
+		MonteCarloAlpha<State, String> agent = new MonteCarloAlpha<State, String>(200, 2);
 
 		int state_t = 0;
 		for (int sum=12; sum<22; sum++) {
@@ -63,6 +63,7 @@ public final class BlackJack {
 		agent.setAction(0, "STICK");
 		agent.setAction(1, "TWIST");
 		agent.setDiscount(1.0);
+		agent.setMeanStep(0.005);
 
 		while (episode < episodes.length) {
 			int ep_step = 0;

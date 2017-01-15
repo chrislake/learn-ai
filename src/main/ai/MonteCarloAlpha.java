@@ -2,8 +2,8 @@ package ai;
 
 import ai.dynamic.programming.MDP;
 
-public class MonteCarlo<S, A> extends MDP<S, A> {
-	private final int[] stateCounts;		// N(s) = N(s) + 1
+public class MonteCarloAlpha<S, A> extends MDP<S, A> {
+	private double alpha;		// N(s) = N(s) + 1
 
 	public static enum Type {
 		ONE_TIME,
@@ -11,9 +11,17 @@ public class MonteCarlo<S, A> extends MDP<S, A> {
 	}
 	private Type type = Type.EVERY_TIME;
 
-	public MonteCarlo(int sizeS, int sizeA) {
+	public MonteCarloAlpha(int sizeS, int sizeA) {
+		this(sizeS, sizeA, 0.0d);
+	}
+
+	public MonteCarloAlpha(int sizeS, int sizeA, double discount) {
+		this(sizeS, sizeA, discount, 0.1d);
+	}
+
+	public MonteCarloAlpha(int sizeS, int sizeA, double discount, double meanStep) {
 		super(sizeS, sizeA);
-		this.stateCounts = new int[sizeS];
+		this.alpha = meanStep;
 	}
 
 	public void evaluateValueFuntion(int[] episode_steps) {
@@ -27,18 +35,21 @@ public class MonteCarlo<S, A> extends MDP<S, A> {
 		}
 	}
 
+	public void setMeanStep(double delta) {
+		alpha = delta;
+	}
+
 	public void evaluateValueFuntionOnce(int[] episode_steps) {
 		// V(s) = Vpi(s) as N(s) = inf
-		boolean[] flagged = new boolean[stateCounts.length];
+		boolean[] flagged = new boolean[st_length];
 		for (int t=0; t<episode_steps.length; t++) {
 			int state_t = episode_steps[t];
 			if (state_t == -1) return;
 			if (flagged[state_t]) continue;
 			flagged[state_t] = true;
 
-			stateCounts[state_t]++;
 			double prevMean = getStateValue(state_t);
-			double mean = prevMean + ((getExpectedReturn(episode_steps, t) - prevMean) / stateCounts[state_t]);
+			double mean = prevMean + (alpha * (getExpectedReturn(episode_steps, t) - prevMean));
 			setStateValue(state_t, mean);
 		}
 	}
@@ -49,9 +60,8 @@ public class MonteCarlo<S, A> extends MDP<S, A> {
 			int state_t = episode_steps[t];
 			if (state_t == -1) return;
 
-			stateCounts[state_t]++;
 			double prevMean = getStateValue(state_t);
-			double mean = prevMean + ((getExpectedReturn(episode_steps, t) - prevMean) / stateCounts[state_t]);
+			double mean = prevMean + (alpha * (getExpectedReturn(episode_steps, t) - prevMean));
 			setStateValue(state_t, mean);
 		}
 	}
