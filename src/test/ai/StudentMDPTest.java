@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ai.MDP.ValueFunction;
+
 public class StudentMDPTest {
 
 	private final static int sizeS = 5;
@@ -12,11 +14,12 @@ public class StudentMDPTest {
 	private final String[] actions = new String[sizeA];
 	private final double[][][] stateTPM = new double[sizeS][sizeA][sizeS];
 	private final double[][] rewards = new double[sizeS][sizeA];
-	private static MarkovDecisionProcess<String, String> markovDecisionProcess;
+	private final double[][] policy = new double[sizeS][sizeA];
+	private static MDP<String, String> markovDecisionProcess;
 
 	@BeforeClass
 	public static void generatemarkovDecisionProcess() {
-		markovDecisionProcess = new MarkovDecisionProcess<String, String>(sizeS, sizeA);
+		markovDecisionProcess = new MDP<String, String>(sizeS, sizeA);
 
 		markovDecisionProcess.setState(0, "C1");
 		markovDecisionProcess.setState(1, "C2");
@@ -49,8 +52,16 @@ public class StudentMDPTest {
 		markovDecisionProcess.setReward(2, 1,  1.0d);
 		markovDecisionProcess.setReward(3, 2, -1.0d);
 		markovDecisionProcess.setReward(3, 3,  0.0d);
-	}
 
+		markovDecisionProcess.setPolicy(0, 0, 0.5d);
+		markovDecisionProcess.setPolicy(0, 2, 0.5d);
+		markovDecisionProcess.setPolicy(1, 0, 0.5d);
+		markovDecisionProcess.setPolicy(1, 4, 0.5d);
+		markovDecisionProcess.setPolicy(2, 0, 0.5d);
+		markovDecisionProcess.setPolicy(2, 1, 0.5d);
+		markovDecisionProcess.setPolicy(3, 3, 0.5d);
+		markovDecisionProcess.setPolicy(3, 2, 0.5d);
+	}
 
 	@Test
 	public void testStates() {
@@ -114,152 +125,203 @@ public class StudentMDPTest {
 	}
 
 	@Test
-	public void testEpisode1() {
-		String[] states1 = new String[4];
-		states1[0] = "C1";
-		states1[1] = "C2";
-		states1[2] = "C3";
-		states1[3] = "SL";
+	public void testPolicies() {
+		policy[0][0] = 0.5d;
+		policy[0][2] = 0.5d;
+		policy[1][0] = 0.5d;
+		policy[1][4] = 0.5d;
+		policy[2][0] = 0.5d;
+		policy[2][1] = 0.5d;
+		policy[3][3] = 0.5d;
+		policy[3][2] = 0.5d;
 
-		String[] actions1 = new String[4];
-		actions1[0] = "ST";
-		actions1[1] = "ST";
-		actions1[2] = "ST";
-		actions1[3] = "SL";
-
-		markovDecisionProcess.setDiscountFactor(0.5d);
-		Assert.assertEquals(-0.5d, markovDecisionProcess.getExpectedReturn(states1, actions1, 0), 0.1d);
-	}
-
-	@Test
-	public void testEpisode2() {
-		String[] states1 = new String[6];
-		states1[0] = "C1";
-		states1[1] = "FB";
-		states1[2] = "FB";
-		states1[3] = "C1";
-		states1[4] = "C2";
-		states1[5] = "SL";
-
-		String[] actions1 = new String[6];
-		actions1[0] = "FB";
-		actions1[1] = "FB";
-		actions1[2] = "QU";
-		actions1[3] = "ST";
-		actions1[4] = "SL";
-		actions1[5] = "SL";
-
-		markovDecisionProcess.setDiscountFactor(0.5d);
-		Assert.assertEquals(-1.75d, markovDecisionProcess.getExpectedReturn(states1, actions1, 0), 0.01d);
-	}
-
-	@Test
-	public void testEpisode3() {
-		String[] states1 = new String[6];
-		states1[0] = "C1";
-		states1[1] = "C2";
-		states1[2] = "C3";
-		states1[3] = "C2";
-		states1[4] = "C3";
-		states1[5] = "SL";
-
-		String[] actions1 = new String[6];
-		actions1[0] = "ST";
-		actions1[1] = "ST";
-		actions1[2] = "PB";
-		actions1[3] = "ST";
-		actions1[4] = "SL";
-		actions1[5] = "SL";
-
-		markovDecisionProcess.setDiscountFactor(0.5d);
-		Assert.assertEquals(-3.0d, markovDecisionProcess.getExpectedReturn(states1, actions1, 0), 0.1d);
-	}
-
-	@Test
-	public void testEpisode4() {
-		String[] states1 = new String[15];
-		states1[0] = "C1";
-		states1[1] = "FB";
-		states1[2] = "FB";
-		states1[3] = "C1";
-		states1[4] = "C2";
-		states1[5] = "C3";
-		states1[6] = "C1";
-		states1[7] = "FB";
-		states1[8] = "FB";
-		states1[9] = "FB";
-		states1[10] = "C1";
-		states1[11] = "C2";
-		states1[12] = "C3";
-		states1[13] = "C2";
-		states1[14] = "SL";
-
-		String[] actions1 = new String[15];
-		actions1[0] = "FB";
-		actions1[1] = "FB";
-		actions1[2] = "QU";
-		actions1[3] = "ST";
-		actions1[4] = "ST";
-		actions1[5] = "PB";
-		actions1[6] = "FB";
-		actions1[7] = "FB";
-		actions1[8] = "FB";
-		actions1[9] = "QU";
-		actions1[10] = "ST";
-		actions1[11] = "ST";
-		actions1[12] = "PB";
-		actions1[13] = "SL";
-		actions1[14] = "SL";
-
-		markovDecisionProcess.setDiscountFactor(0.5d);
-		Assert.assertEquals(-1.874d, markovDecisionProcess.getExpectedReturn(states1, actions1, 0), 0.001d);
+		for (int state=0; state<sizeS; state++) {
+			Assert.assertArrayEquals(policy[state], markovDecisionProcess.getPolicy()[state], 0.001d);
+			double sum = 0.0d;
+			for (int i=0; i<sizeA; i++) {
+				sum += policy[state][i];
+			}
+			if (state != 4) Assert.assertEquals(sum, 1.0d, 0.000001d);
+		}
 	}
 
 	@Test
 	public void testDiscount00Matrix() {
-		markovDecisionProcess.setUseBellmanMatrix(true);	// FAIL - INCOMPLETE
-//		markovDecisionProcess.setDiscountFactor(0.0d);		// FAIL - INCOMPLETE
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_MATRIX);
+		markovDecisionProcess.setDiscount(0.0d);
+		markovDecisionProcess.evaluateValueFunction();
+		Assert.assertEquals(-1.5d, markovDecisionProcess.getStateValue("C1"), 0.1d);
+		Assert.assertEquals(-1.0d, markovDecisionProcess.getStateValue("C2"), 0.1d);
+		Assert.assertEquals( 5.5d, markovDecisionProcess.getStateValue("C3"), 0.1d);
+		Assert.assertEquals(-0.5d, markovDecisionProcess.getStateValue("FB"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("SL"), 0.1d);
 	}
 
 	@Test
 	public void testDiscount05Matrix() {
-		markovDecisionProcess.setUseBellmanMatrix(true);	// FAIL - INCOMPLETE
-//		markovDecisionProcess.setDiscountFactor(0.5d);		// FAIL - INCOMPLETE
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_MATRIX);
+		markovDecisionProcess.setDiscount(0.5d);
+		markovDecisionProcess.evaluateValueFunction();
+		Assert.assertEquals(-1.68d, markovDecisionProcess.getStateValue("C1"), 0.01d);
+		Assert.assertEquals( 0.52d, markovDecisionProcess.getStateValue("C2"), 0.01d);
+		Assert.assertEquals( 6.08d, markovDecisionProcess.getStateValue("C3"), 0.01d);
+		Assert.assertEquals(-1.23d, markovDecisionProcess.getStateValue("FB"), 0.01d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("SL"), 0.01d);
 	}
 
 	@Test
 	public void testDiscount09Matrix() {
-		markovDecisionProcess.setUseBellmanMatrix(true);	// FAIL - INCOMPLETE
-//		markovDecisionProcess.setDiscountFactor(0.9d);		// FAIL - INCOMPLETE
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_MATRIX);
+		markovDecisionProcess.setDiscount(0.9d);
+		markovDecisionProcess.evaluateValueFunction();
+		Assert.assertEquals(-1.48d, markovDecisionProcess.getStateValue("C1"), 0.01d);
+		Assert.assertEquals( 2.16d, markovDecisionProcess.getStateValue("C2"), 0.01d);
+		Assert.assertEquals( 7.02d, markovDecisionProcess.getStateValue("C3"), 0.01d);
+		Assert.assertEquals(-2.12d, markovDecisionProcess.getStateValue("FB"), 0.01d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("SL"), 0.01d);
 	}
 
 	@Test
 	public void testDiscount10Matrix() {
-		markovDecisionProcess.setUseBellmanMatrix(true);	// FAIL - INCOMPLETE
-//		markovDecisionProcess.setDiscountFactor(1.0d);		// FAIL - INCOMPLETE
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_MATRIX);
+		markovDecisionProcess.setDiscount(1.0d);
+		markovDecisionProcess.evaluateValueFunction();
+		Assert.assertEquals(-1.3d, markovDecisionProcess.getStateValue("C1"), 0.1d);
+		Assert.assertEquals( 2.7d, markovDecisionProcess.getStateValue("C2"), 0.1d);
+		Assert.assertEquals( 7.4d, markovDecisionProcess.getStateValue("C3"), 0.1d);
+		Assert.assertEquals(-2.3d, markovDecisionProcess.getStateValue("FB"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("SL"), 0.1d);
 	}
 
 	@Test
 	public void testDiscount00Loop() {
-		markovDecisionProcess.setUseBellmanMatrix(false);	// FAIL - INCOMPLETE
-//		markovDecisionProcess.setDiscountFactor(0.0d);		// FAIL - INCOMPLETE
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_EQUATION);
+		markovDecisionProcess.setDiscount(0.0d);
+		markovDecisionProcess.evaluateValueFunction();
+		Assert.assertEquals(-1.5d, markovDecisionProcess.getStateValue("C1"), 0.1d);
+		Assert.assertEquals(-1.0d, markovDecisionProcess.getStateValue("C2"), 0.1d);
+		Assert.assertEquals( 5.5d, markovDecisionProcess.getStateValue("C3"), 0.1d);
+		Assert.assertEquals(-0.5d, markovDecisionProcess.getStateValue("FB"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("SL"), 0.1d);
 	}
 
 	@Test
 	public void testDiscount05Loop() {
-		markovDecisionProcess.setUseBellmanMatrix(false);	// FAIL - INCOMPLETE
-//		markovDecisionProcess.setDiscountFactor(0.5d);		// FAIL - INCOMPLETE
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_EQUATION);
+		markovDecisionProcess.setDiscount(0.5d);
+		markovDecisionProcess.evaluateValueFunction();
+		Assert.assertEquals(-1.68d, markovDecisionProcess.getStateValue("C1"), 0.01d);
+		Assert.assertEquals( 0.52d, markovDecisionProcess.getStateValue("C2"), 0.01d);
+		Assert.assertEquals( 6.08d, markovDecisionProcess.getStateValue("C3"), 0.01d);
+		Assert.assertEquals(-1.23d, markovDecisionProcess.getStateValue("FB"), 0.01d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("SL"), 0.01d);
 	}
 
 	@Test
 	public void testDiscount09Loop() {
-		markovDecisionProcess.setUseBellmanMatrix(false);	// FAIL - INCOMPLETE
-//		markovDecisionProcess.setDiscountFactor(0.9d);		// FAIL - INCOMPLETE
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_EQUATION);
+		markovDecisionProcess.setDiscount(0.9d);
+		markovDecisionProcess.evaluateValueFunction();
+		Assert.assertEquals(-1.48d, markovDecisionProcess.getStateValue("C1"), 0.01d);
+		Assert.assertEquals( 2.16d, markovDecisionProcess.getStateValue("C2"), 0.01d);
+		Assert.assertEquals( 7.02d, markovDecisionProcess.getStateValue("C3"), 0.01d);
+		Assert.assertEquals(-2.12d, markovDecisionProcess.getStateValue("FB"), 0.01d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("SL"), 0.01d);
 	}
 
 	@Test
 	public void testDiscount10Loop() {
-		markovDecisionProcess.setUseBellmanMatrix(false);	// FAIL - INCOMPLETE
-//		markovDecisionProcess.setDiscountFactor(1.0d);		// FAIL - INCOMPLETE
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_EQUATION);
+		markovDecisionProcess.setDiscount(1.0d);
+		markovDecisionProcess.evaluateValueFunction();
+		Assert.assertEquals(-1.3d, markovDecisionProcess.getStateValue("C1"), 0.1d);
+		Assert.assertEquals( 2.7d, markovDecisionProcess.getStateValue("C2"), 0.1d);
+		Assert.assertEquals( 7.4d, markovDecisionProcess.getStateValue("C3"), 0.1d);
+		Assert.assertEquals(-2.3d, markovDecisionProcess.getStateValue("FB"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("SL"), 0.1d);
+	}
+
+	@Test
+	public void testDiscount00Optimal() {
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_OPTIMAL);
+		markovDecisionProcess.setDiscount(0.0d);
+		markovDecisionProcess.evaluateValueFunction();
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("C1"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("C2"), 0.1d);
+		Assert.assertEquals(10.0d, markovDecisionProcess.getStateValue("C3"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("FB"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("SL"), 0.1d);
+
+		Assert.assertEquals(-2.0d, markovDecisionProcess.getActionValue("C1", "ST"), 0.1d);
+		Assert.assertEquals(-1.0d, markovDecisionProcess.getActionValue("C1", "FB"), 0.1d);
+		Assert.assertEquals(-2.0d, markovDecisionProcess.getActionValue("C2", "ST"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getActionValue("C2", "SL"), 0.1d);
+		Assert.assertEquals(10.0d, markovDecisionProcess.getActionValue("C3", "ST"), 0.1d);
+		Assert.assertEquals( 1.0d, markovDecisionProcess.getActionValue("C3", "PB"), 0.1d);
+		Assert.assertEquals(-1.0d, markovDecisionProcess.getActionValue("FB", "FB"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getActionValue("FB", "QU"), 0.1d);
+	}
+
+	@Test
+	public void testDiscount05Optimal() {
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_OPTIMAL);
+		markovDecisionProcess.setDiscount(0.5d);
+		markovDecisionProcess.evaluateValueFunction();
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("C1"), 0.1d);
+		Assert.assertEquals( 3.0d, markovDecisionProcess.getStateValue("C2"), 0.1d);
+		Assert.assertEquals(10.0d, markovDecisionProcess.getStateValue("C3"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("FB"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("SL"), 0.1d);
+
+		Assert.assertEquals(-0.5d, markovDecisionProcess.getActionValue("C1", "ST"), 0.1d);
+		Assert.assertEquals(-1.0d, markovDecisionProcess.getActionValue("C1", "FB"), 0.1d);
+		Assert.assertEquals( 3.0d, markovDecisionProcess.getActionValue("C2", "ST"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getActionValue("C2", "SL"), 0.1d);
+		Assert.assertEquals(10.0d, markovDecisionProcess.getActionValue("C3", "ST"), 0.1d);
+		Assert.assertEquals( 3.6d, markovDecisionProcess.getActionValue("C3", "PB"), 0.1d);
+		Assert.assertEquals(-1.0d, markovDecisionProcess.getActionValue("FB", "FB"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getActionValue("FB", "QU"), 0.1d);
+	}
+
+	@Test
+	public void testDiscount09Optimal() {
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_OPTIMAL);
+		markovDecisionProcess.setDiscount(0.9d);
+		markovDecisionProcess.evaluateValueFunction();
+		Assert.assertEquals( 4.3d, markovDecisionProcess.getStateValue("C1"), 0.1d);
+		Assert.assertEquals( 7.0d, markovDecisionProcess.getStateValue("C2"), 0.1d);
+		Assert.assertEquals(10.0d, markovDecisionProcess.getStateValue("C3"), 0.1d);
+		Assert.assertEquals( 3.9d, markovDecisionProcess.getStateValue("FB"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("SL"), 0.1d);
+
+		Assert.assertEquals( 4.3d, markovDecisionProcess.getActionValue("C1", "ST"), 0.1d);
+		Assert.assertEquals( 2.5d, markovDecisionProcess.getActionValue("C1", "FB"), 0.1d);
+		Assert.assertEquals( 7.0d, markovDecisionProcess.getActionValue("C2", "ST"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getActionValue("C2", "SL"), 0.1d);
+		Assert.assertEquals(10.0d, markovDecisionProcess.getActionValue("C3", "ST"), 0.1d);
+		Assert.assertEquals( 7.9d, markovDecisionProcess.getActionValue("C3", "PB"), 0.1d);
+		Assert.assertEquals( 2.5d, markovDecisionProcess.getActionValue("FB", "FB"), 0.1d);
+		Assert.assertEquals( 3.9d, markovDecisionProcess.getActionValue("FB", "QU"), 0.1d);
+	}
+
+	@Test
+	public void testDiscount10Optimal() {
+		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_OPTIMAL);
+		markovDecisionProcess.setDiscount(1.0d);
+		markovDecisionProcess.evaluateValueFunction();
+		Assert.assertEquals( 6.0d, markovDecisionProcess.getStateValue("C1"), 0.1d);
+		Assert.assertEquals( 8.0d, markovDecisionProcess.getStateValue("C2"), 0.1d);
+		Assert.assertEquals(10.0d, markovDecisionProcess.getStateValue("C3"), 0.1d);
+		Assert.assertEquals( 6.0d, markovDecisionProcess.getStateValue("FB"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getStateValue("SL"), 0.1d);
+
+		Assert.assertEquals( 6.0d, markovDecisionProcess.getActionValue("C1", "ST"), 0.1d);
+		Assert.assertEquals( 5.0d, markovDecisionProcess.getActionValue("C1", "FB"), 0.1d);
+		Assert.assertEquals( 8.0d, markovDecisionProcess.getActionValue("C2", "ST"), 0.1d);
+		Assert.assertEquals( 0.0d, markovDecisionProcess.getActionValue("C2", "SL"), 0.1d);
+		Assert.assertEquals(10.0d, markovDecisionProcess.getActionValue("C3", "ST"), 0.1d);
+		Assert.assertEquals( 9.4d, markovDecisionProcess.getActionValue("C3", "PB"), 0.1d);
+		Assert.assertEquals( 5.0d, markovDecisionProcess.getActionValue("FB", "FB"), 0.1d);
+		Assert.assertEquals( 6.0d, markovDecisionProcess.getActionValue("FB", "QU"), 0.1d);
 	}
 }

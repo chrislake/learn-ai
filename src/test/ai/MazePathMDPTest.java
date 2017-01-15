@@ -355,7 +355,6 @@ public class MazePathMDPTest {
 		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
 		markovDecisionProcess.setValueFunctionAttempts(1);
 		markovDecisionProcess.setDiscount(1.0d);
-		markovDecisionProcess.resetStateValues();
 		markovDecisionProcess.evaluateValueFunction();
 		markovDecisionProcess.improvePolicy();
 		markovDecisionProcess.evaluateValueFunction();

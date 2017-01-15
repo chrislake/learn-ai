@@ -269,7 +269,6 @@ public class ShortestPathMDPTest {
 
 	@Test
 	public void testDiscount10CountK0() {
-		markovDecisionProcess.resetStateValues();
 		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
 		markovDecisionProcess.setValueFunctionAttempts(0);
 		markovDecisionProcess.setDiscount(1.0d);
@@ -296,7 +295,6 @@ public class ShortestPathMDPTest {
 
 	@Test
 	public void testDiscount10CountK1() {
-		markovDecisionProcess.resetStateValues();
 		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
 		markovDecisionProcess.setValueFunctionAttempts(1);
 		markovDecisionProcess.setDiscount(1.0d);
@@ -323,7 +321,6 @@ public class ShortestPathMDPTest {
 
 	@Test
 	public void testDiscount10CountK2() {
-		markovDecisionProcess.resetStateValues();
 		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
 		markovDecisionProcess.setValueFunctionAttempts(2);
 		markovDecisionProcess.setDiscount(1.0d);
@@ -351,7 +348,6 @@ public class ShortestPathMDPTest {
 
 	@Test
 	public void testDiscount10CountK3() {
-		markovDecisionProcess.resetStateValues();
 		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
 		markovDecisionProcess.setValueFunctionAttempts(3);
 		markovDecisionProcess.setDiscount(1.0d);
@@ -378,7 +374,6 @@ public class ShortestPathMDPTest {
 
 	@Test
 	public void testDiscount10CountK4() {
-		markovDecisionProcess.resetStateValues();
 		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
 		markovDecisionProcess.setValueFunctionAttempts(4);
 		markovDecisionProcess.setDiscount(1.0d);
@@ -405,7 +400,6 @@ public class ShortestPathMDPTest {
 
 	@Test
 	public void testDiscount10CountK5() {
-		markovDecisionProcess.resetStateValues();
 		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
 		markovDecisionProcess.setValueFunctionAttempts(5);
 		markovDecisionProcess.setDiscount(1.0d);
@@ -432,7 +426,6 @@ public class ShortestPathMDPTest {
 
 	@Test
 	public void testDiscount10CountK6() {
-		markovDecisionProcess.resetStateValues();
 		markovDecisionProcess.setValueFunction(ValueFunction.BELLMAN_ITERATIVE);
 		markovDecisionProcess.setValueFunctionAttempts(6);
 		markovDecisionProcess.setDiscount(1.0d);

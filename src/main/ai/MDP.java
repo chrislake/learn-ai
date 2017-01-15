@@ -400,7 +400,11 @@ public class MDP<S, A> {
 				for (int col=0; col<len; col++) {
 					setStateValue(row, getStateValue(row) + Imatrix[row][col] * getReward(col, action_t) * getStatePolicy(col, action_t));
 				}
-//				actionFunction(row, action_t);
+			}
+		}
+		for (int state_t=0; state_t<st_length; state_t++) {
+			for (int action_t=0; action_t<at_length; action_t++) {
+				actionFunction(state_t, action_t);
 			}
 		}
 		
@@ -430,12 +434,6 @@ public class MDP<S, A> {
 			policy[state_t] = new double[at_length];
 
 			double[] av = getStateActionValues(state_t);
-			if (valueFunction.equals(ValueFunction.BELLMAN_MATRIX)) {
-				for (int action_t=0; action_t<at_length; action_t++) {
-					av[action_t] = actionFunction(state_t, action_t);
-				}
-			}
-
 			int[] argMax = Util.argMax(av, valueFunctionMax, valueFunctionDelta);
 			int amx_length = argMax.length;
 			for (int k=0; k<amx_length; k++) {
